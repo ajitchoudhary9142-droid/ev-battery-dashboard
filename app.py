@@ -2,17 +2,18 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import time
 import base64
 import os
 
 st.set_page_config(
-    page_title="EV Telemetry 3D Cockpit",
+    page_title="EV Telemetry Cockpit HUD",
     page_icon="⚡",
     layout="wide"
 )
 
-# Function to load local image
+# Load local car background image
 def get_base64_bg(image_file):
     if os.path.exists(image_file):
         with open(image_file, "rb") as f:
@@ -22,29 +23,69 @@ def get_base64_bg(image_file):
 
 bg_base64 = get_base64_bg("car_bg.jpg")
 if bg_base64:
-    bg_style = f"background: url('data:image/jpeg;base64,{bg_base64}') no-repeat center center fixed !important;"
+    bg_img = f"url('data:image/jpeg;base64,{bg_base64}')"
 else:
-    bg_style = "background: url('https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed !important;"
+    bg_img = "url('https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1920&q=80')"
 
-# ----------------- ADVANCED CSS STYLING WITH HEXAGONS & VAPOR -----------------
+# ----------------- CSS: 25% LIGHT FILM + BUBBLE EFFECT + HUD -----------------
 st.markdown(f"""
 <style>
+    /* 1. Background with Exactly 25% Light Film Overlay */
     .stApp {{
-        {bg_style}
+        background: 
+            linear-gradient(rgba(250, 250, 250, 0.25), rgba(250, 250, 250, 0.25)),
+            {bg_img} no-repeat center center fixed !important;
         background-size: cover !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
         color: #FAFAFA !important;
         overflow-x: hidden !important;
     }}
 
-    /* ROTATING HEXAGON WHEEL */
+    /* 2. Floating Bubbles Animation */
+    @keyframes floatUp {{
+        0% {{
+            transform: translateY(105vh) scale(0.6);
+            opacity: 0;
+        }}
+        30% {{
+            opacity: 0.7;
+        }}
+        80% {{
+            opacity: 0.5;
+        }}
+        100% {{
+            transform: translateY(-20vh) scale(1.2);
+            opacity: 0;
+        }}
+    }}
+
+    .bubble {{
+        position: fixed;
+        bottom: -50px;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(56, 189, 248, 0.35));
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        box-shadow: 0 0 12px rgba(56, 189, 248, 0.5), inset 0 0 6px rgba(255, 255, 255, 0.8);
+        pointer-events: none;
+        z-index: 999;
+        animation: floatUp 8s infinite ease-in;
+    }}
+
+    .b1 {{ left: 8%; width: 22px; height: 22px; animation-duration: 7s; animation-delay: 0s; }}
+    .b2 {{ left: 24%; width: 34px; height: 34px; animation-duration: 9s; animation-delay: 2s; }}
+    .b3 {{ left: 42%; width: 16px; height: 16px; animation-duration: 6s; animation-delay: 4s; }}
+    .b4 {{ left: 63%; width: 28px; height: 28px; animation-duration: 8.5s; animation-delay: 1.5s; }}
+    .b5 {{ left: 79%; width: 38px; height: 38px; animation-duration: 10s; animation-delay: 3s; }}
+    .b6 {{ left: 91%; width: 18px; height: 18px; animation-duration: 7.5s; animation-delay: 5s; }}
+
+    /* 3. Hexagon Rotating Gears */
     @keyframes spinWheel {{
         0% {{ transform: rotate(0deg); }}
         100% {{ transform: rotate(360deg); }}
     }}
     @keyframes floatBox {{
         0% {{ transform: translateY(0px); }}
-        50% {{ transform: translateY(-8px); }}
+        50% {{ transform: translateY(-7px); }}
         100% {{ transform: translateY(0px); }}
     }}
 
@@ -52,70 +93,70 @@ st.markdown(f"""
         display: flex;
         align-items: center;
         gap: 15px;
-        background: rgba(85, 107, 47, 0.85);
+        background: rgba(85, 107, 47, 0.88);
         border: 2px solid #84A346;
         border-radius: 18px;
         padding: 16px 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.7);
-        backdrop-filter: blur(6px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+        backdrop-filter: blur(5px);
         animation: floatBox 4s ease-in-out infinite;
     }}
 
     .hex-wheel {{
-        width: 55px;
-        height: 55px;
+        width: 52px;
+        height: 52px;
         background: #6B8E23;
         clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
         display: flex;
         align-items: center;
         justify-content: center;
-        animation: spinWheel 8s linear infinite;
-        box-shadow: 0 0 15px #84A346;
+        animation: spinWheel 7s linear infinite;
+        box-shadow: 0 0 14px #84A346;
         border: 2px solid #FAFAFA;
     }}
 
-    .hex-inner-cog {{
-        width: 22px;
-        height: 22px;
+    .hex-cog {{
+        width: 20px;
+        height: 20px;
         background: #1E293B;
         border-radius: 50%;
         border: 2px dashed #FAFAFA;
     }}
 
-    /* RANDOM OFFSET HUD BOXES */
-    .random-offset-left {{
-        margin-top: 15px;
-        margin-left: 20px;
+    /* 4. Randomized Asymmetrical Shapes */
+    .random-hud-blue {{
+        margin-top: 14px;
+        margin-left: 10px;
         transform: rotate(-1.5deg);
-        background: linear-gradient(135deg, rgba(2, 132, 199, 0.9), rgba(14, 165, 233, 0.75));
+        background: linear-gradient(135deg, rgba(2, 132, 199, 0.9), rgba(14, 165, 233, 0.8));
         border: 2px solid #38BDF8;
         border-radius: 25px 8px 30px 5px;
         padding: 18px;
-        box-shadow: 0 12px 28px rgba(0,0,0,0.6);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.55);
         animation: floatBox 5s ease-in-out infinite 0.5s;
     }}
 
-    .random-offset-right {{
-        margin-top: -10px;
-        margin-right: 15px;
-        transform: rotate(1.2deg);
-        background: linear-gradient(135deg, rgba(255, 228, 232, 0.92), rgba(255, 182, 193, 0.88));
+    .random-hud-pink {{
+        margin-top: -8px;
+        margin-right: 12px;
+        transform: rotate(1.4deg);
+        background: linear-gradient(135deg, rgba(255, 228, 232, 0.94), rgba(255, 182, 193, 0.9));
         color: #881337 !important;
         border: 2px solid #FF6584;
         border-radius: 5px 30px 10px 35px;
         padding: 18px;
-        box-shadow: 0 12px 28px rgba(0,0,0,0.6);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.55);
         animation: floatBox 4.5s ease-in-out infinite 1s;
     }}
 
-    .random-offset-center {{
-        margin-top: 10px;
+    .random-hud-white {{
+        margin-top: 8px;
         background: rgba(250, 250, 250, 0.94);
         color: #1E293B !important;
         border-left: 8px solid #556B2F;
         border-radius: 12px;
         padding: 16px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.55);
         animation: floatBox 6s ease-in-out infinite 1.5s;
     }}
 
@@ -134,19 +175,11 @@ st.markdown(f"""
         font-family: 'Impact', 'Arial Black', sans-serif;
     }}
 
-    /* GREEN VAPOR / INDUSTRIAL MIST ANIMATION */
+    /* 5. Green Industrial Vapor Animation */
     @keyframes vaporRise {{
-        0% {{
-            background-position: 0% 100%, 0% 100%;
-            opacity: 0.5;
-        }}
-        50% {{
-            opacity: 0.85;
-        }}
-        100% {{
-            background-position: 100% 0%, 50% 0%;
-            opacity: 0.5;
-        }}
+        0% {{ background-position: 0% 100%, 0% 100%; opacity: 0.5; }}
+        50% {{ opacity: 0.85; }}
+        100% {{ background-position: 100% 0%, 50% 0%; opacity: 0.5; }}
     }}
 
     .green-vapor-zone {{
@@ -154,20 +187,30 @@ st.markdown(f"""
         bottom: 0;
         left: 0;
         width: 100vw;
-        height: 140px;
+        height: 120px;
         pointer-events: none;
-        z-index: 9999;
+        z-index: 998;
         background: 
-            radial-gradient(circle at bottom, rgba(85, 107, 47, 0.6) 0%, rgba(107, 142, 35, 0.3) 40%, transparent 80%),
-            linear-gradient(to top, rgba(85, 107, 47, 0.45) 0%, rgba(132, 163, 70, 0.2) 50%, transparent 100%);
+            radial-gradient(circle at bottom, rgba(85, 107, 47, 0.6) 0%, rgba(107, 142, 35, 0.25) 45%, transparent 80%),
+            linear-gradient(to top, rgba(85, 107, 47, 0.45) 0%, rgba(132, 163, 70, 0.15) 50%, transparent 100%);
         animation: vaporRise 6s ease-in-out infinite alternate;
-        filter: blur(12px);
+        filter: blur(10px);
     }}
 </style>
+
+<!-- Floating Bubble Elements -->
+<div class="bubble b1"></div>
+<div class="bubble b2"></div>
+<div class="bubble b3"></div>
+<div class="bubble b4"></div>
+<div class="bubble b5"></div>
+<div class="bubble b6"></div>
+
+<!-- Green Rising Vapor -->
 <div class="green-vapor-zone"></div>
 """, unsafe_allow_html=True)
 
-# ----------------- 1 LAKH (100,000) SYNTHETIC TELEMETRY CACHE -----------------
+# ----------------- 1 LAKH (100,000) DATA ENGINE -----------------
 @st.cache_data
 def build_1lakh_dataset():
     np.random.seed(42)
@@ -192,9 +235,9 @@ def build_1lakh_dataset():
 
 dataset_1lakh = build_1lakh_dataset()
 
-# ----------------- SESSION CONTROLLER -----------------
+# Telemetry session update
 if "sim_idx" not in st.session_state:
-    st.session_state.sim_idx = 45600  # Start around ~456 cycles mark
+    st.session_state.sim_idx = 45600
 
 st.session_state.sim_idx = (st.session_state.sim_idx + 180) % 99900
 curr_point = dataset_1lakh.iloc[st.session_state.sim_idx]
@@ -211,65 +254,61 @@ resistance = float(curr_point["resistance"])
 
 # ----------------- TOP BANNER -----------------
 st.markdown("""
-    <div style='background:linear-gradient(90deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95)); border:2px solid #38BDF8; border-top:5px solid #556B2F; border-radius:14px; padding:14px 24px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;'>
+    <div style='background:linear-gradient(90deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95)); border:2px solid #38BDF8; border-top:5px solid #556B2F; border-radius:14px; padding:14px 24px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 8px 25px rgba(0,0,0,0.6);'>
         <div>
-            <div style='font-size:11px; letter-spacing:2px; color:#38BDF8; font-weight:800;'>DYNAMIC 1-LAKH INTEGRATED TELEMETRY</div>
-            <h2 style='margin:0; font-size:22px; color:#FAFAFA; font-weight:900;'>⚡ EV HEXAGON WHEEL HUD & 3D MESH CONSOLE</h2>
+            <div style='font-size:11px; letter-spacing:2px; color:#38BDF8; font-weight:800;'>AERODYNAMIC 25% FILM HUD INTERFACE</div>
+            <h2 style='margin:0; font-size:22px; color:#FAFAFA; font-weight:900;'>⚡ EV COCKPIT TELEMETRY & 2D DUAL-STREAM GRAPH</h2>
         </div>
-        <div style='background:#556B2F; color:#FFF; font-weight:800; padding:6px 16px; border-radius:20px; font-size:12px;'>
-            ● LIVE SOH STREAM
+        <div style='background:#556B2F; color:#FFF; font-weight:800; padding:6px 16px; border-radius:20px; font-size:12px; border:1px solid #84A346;'>
+            ● LIVE SOH INGESTION
         </div>
     </div>
 """, unsafe_allow_html=True)
 
-# ----------------- IRREGULAR / RANDOMIZED STAGGERED HEXAGON LAYOUT -----------------
+# ----------------- RANDOM STAGGERED HEXAGON GAUGES -----------------
 col_h1, col_h2, col_h3, col_h4 = st.columns([1.1, 1, 1, 1.1])
 
 with col_h1:
-    # Hexagon Wheel Animated Box
     st.markdown(f"""
         <div class="hex-wheel-container">
             <div class="hex-wheel">
-                <div class="hex-inner-cog"></div>
+                <div class="hex-cog"></div>
             </div>
             <div>
                 <div class="hud-title">ACTIVE SOH WHEEL</div>
-                <div class="hud-val" style="color:#FAFAFA;">{actual_soh:.2f}%</div>
-                <div style="font-size:11px; opacity:0.85;">1-Lakh Telemetry Synced</div>
+                <div class="hud-val">{actual_soh:.2f}%</div>
+                <div style="font-size:11px; opacity:0.85;">Frame {st.session_state.sim_idx} / 100K</div>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
 with col_h2:
-    # Random Offset Left Sky Blue
     st.markdown(f"""
-        <div class="random-offset-left">
-            <div class="hud-title">CYCLE INDEX</div>
+        <div class="random-hud-blue">
+            <div class="hud-title">TOTAL CYCLES</div>
             <div class="hud-val">{cycle_val}</div>
-            <div style="font-size:11px; opacity:0.85;">Frame {st.session_state.sim_idx} / 100K</div>
+            <div style="font-size:11px; opacity:0.85;">Drive Cycle Mileage</div>
         </div>
     """, unsafe_allow_html=True)
 
 with col_h3:
-    # Random Offset Right Light Pink
     st.markdown(f"""
-        <div class="random-offset-right">
+        <div class="random-hud-pink">
             <div class="hud-title" style="color:#881337;">CELL CORE TEMP</div>
             <div class="hud-val" style="color:#881337;">{temp:.2f} °C</div>
-            <div style="font-size:11px; opacity:0.85; color:#881337;">Vapor Threshold Monitored</div>
+            <div style="font-size:11px; opacity:0.85; color:#881337;">Thermal Alert &lt; 65°C</div>
         </div>
     """, unsafe_allow_html=True)
 
 with col_h4:
-    # Hexagon Wheel Animated Box 2
     st.markdown(f"""
-        <div class="hex-wheel-container" style="background:rgba(2, 132, 199, 0.85); border-color:#38BDF8;">
-            <div class="hex-wheel" style="background:#0284C7; box-shadow:0 0 15px #38BDF8;">
-                <div class="hex-inner-cog"></div>
+        <div class="hex-wheel-container" style="background:rgba(2, 132, 199, 0.88); border-color:#38BDF8;">
+            <div class="hex-wheel" style="background:#0284C7; box-shadow:0 0 14px #38BDF8;">
+                <div class="hex-cog"></div>
             </div>
             <div>
                 <div class="hud-title">TERMINAL VOLTS</div>
-                <div class="hud-val" style="color:#FAFAFA;">{voltage:.3f} V</div>
+                <div class="hud-val">{voltage:.3f} V</div>
                 <div style="font-size:11px; opacity:0.85;">Load: {current:.2f} A</div>
             </div>
         </div>
@@ -277,97 +316,111 @@ with col_h4:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ----------------- SECTION 2: AI & POWERTRAIN STAGGERED ROW -----------------
+# ----------------- STATS ROW (STAGGERED) -----------------
 r_a, r_b, r_c, r_d = st.columns(4)
 
 with r_a:
     st.markdown(f"""
-        <div class="random-offset-center">
+        <div class="random-hud-white">
             <div class="hud-title" style="color:#556B2F;">AI PREDICTED SOH</div>
             <div class="hud-val" style="color:#556B2F;">{pred_soh:.2f}%</div>
-            <div style="font-size:11px; color:#64748B;">Neural Net Inference</div>
+            <div style="font-size:11px; color:#64748B;">Neural Estimation</div>
         </div>
     """, unsafe_allow_html=True)
 
 with r_b:
     st.markdown(f"""
-        <div class="random-offset-right" style="margin-top:0px;">
+        <div class="random-hud-pink" style="margin-top:0px;">
             <div class="hud-title" style="color:#881337;">PREDICTION DRIFT</div>
             <div class="hud-val" style="color:#881337;">{pred_error:.2f}%</div>
-            <div style="font-size:11px; color:#881337;">Residual Variance</div>
+            <div style="font-size:11px; color:#881337;">Dynamic Residual Drift</div>
         </div>
     """, unsafe_allow_html=True)
 
 with r_c:
     st.markdown(f"""
-        <div class="random-offset-left" style="margin-top:0px;">
-            <div class="hud-title">USABLE CAPACITY</div>
+        <div class="random-hud-blue" style="margin-top:0px;">
+            <div class="hud-title">ACTIVE CAPACITY</div>
             <div class="hud-val">{capacity:.3f} Ah</div>
-            <div style="font-size:11px; opacity:0.85;">Nominal 3.0 Ah Cell</div>
+            <div style="font-size:11px; opacity:0.85;">Nominal: 3.000 Ah</div>
         </div>
     """, unsafe_allow_html=True)
 
 with r_d:
     st.markdown(f"""
-        <div class="random-offset-center">
-            <div class="hud-title" style="color:#1E293B;">INTERNAL IMPEDANCE</div>
+        <div class="random-hud-white">
+            <div class="hud-title" style="color:#1E293B;">IMPEDANCE (R₀)</div>
             <div class="hud-val" style="color:#1E293B;">{resistance:.5f} Ω</div>
-            <div style="font-size:11px; color:#64748B;">Ohmic Degradation</div>
+            <div style="font-size:11px; color:#64748B;">Internal Resistance</div>
         </div>
     """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ----------------- 3D TELEMETRY GRAPH SECTION -----------------
-st.markdown("<h3 style='color:#38BDF8; font-size:17px; font-weight:800; letter-spacing:1px; margin-bottom:5px;'>🌐 REAL-TIME 3D TELEMETRY SURFACE (VOLTAGE vs TEMP vs SOH)</h3>", unsafe_allow_html=True)
+# ----------------- BEST 2D DUAL-AXIS TELEMETRY GRAPH -----------------
+st.markdown("<h3 style='color:#38BDF8; font-size:17px; font-weight:800; letter-spacing:1px; margin-bottom:5px;'>📊 REAL-TIME 2D TELEMETRY DUAL WAVEFORM (VOLTAGE & TEMPERATURE TREND)</h3>", unsafe_allow_html=True)
 
-# Sample 1,200 points around current simulation window from the 1-lakh dataset for high-FPS 3D rendering
-start_sample = max(0, st.session_state.sim_idx - 600)
-end_sample = min(100000, st.session_state.sim_idx + 600)
-sample_df = dataset_1lakh.iloc[start_sample:end_sample]
+# Window slice of 200 data points from the 1-lakh dataset
+start_idx = max(0, st.session_state.sim_idx - 150)
+end_idx = min(100000, st.session_state.sim_idx + 50)
+window_df = dataset_1lakh.iloc[start_idx:end_idx]
 
-fig_3d = go.Figure(data=[go.Scatter3d(
-    x=sample_df["voltage"],
-    y=sample_df["temperature"],
-    z=sample_df["actual_soh"],
-    mode='markers',
-    marker=dict(
-        size=3.5,
-        color=sample_df["actual_soh"],
-        colorscale=[
-            [0, '#FF6584'],     # Light Pink alert
-            [0.5, '#38BDF8'],   # Sky Blue
-            [1, '#6B8E23']      # Olive Green
-        ],
-        opacity=0.85
-    )
-)])
+# Create Dual Y-Axis 2D Graph
+fig_2d = make_subplots(specs=[[{"secondary_y": True}]])
 
-# Highlight the live operating point in 3D
-fig_3d.add_trace(go.Scatter3d(
-    x=[voltage],
-    y=[temp],
-    z=[actual_soh],
-    mode='markers+text',
-    marker=dict(size=10, color='#FAFAFA', symbol='diamond', line=dict(color='#556B2F', width=2)),
-    name='LIVE OPERATING POINT',
-    text=['● CURRENT POINT'],
-    textposition='top center'
-))
-
-fig_3d.update_layout(
-    scene=dict(
-        xaxis=dict(title='Voltage (V)', backgroundcolor="rgba(10,15,25,0.8)", gridcolor="#334155"),
-        yaxis=dict(title='Temperature (°C)', backgroundcolor="rgba(10,15,25,0.8)", gridcolor="#334155"),
-        zaxis=dict(title='SOH (%)', backgroundcolor="rgba(10,15,25,0.8)", gridcolor="#334155"),
+# 1. Voltage Curve (Olive Green)
+fig_2d.add_trace(
+    go.Scatter(
+        x=window_df["cycle"],
+        y=window_df["voltage"],
+        name="Terminal Voltage (V)",
+        mode="lines",
+        line=dict(color="#556B2F", width=3),
+        fill='tozeroy',
+        fillcolor='rgba(85, 107, 47, 0.15)'
     ),
-    paper_bgcolor='rgba(15,23,42,0.75)',
-    margin=dict(l=10, r=10, b=10, t=10),
-    height=420
+    secondary_y=False
 )
 
-st.plotly_chart(fig_3d, use_container_width=True)
+# 2. Temperature Curve (Light Pink / Rose)
+fig_2d.add_trace(
+    go.Scatter(
+        x=window_df["cycle"],
+        y=window_df["temperature"],
+        name="Core Temp (°C)",
+        mode="lines",
+        line=dict(color="#FF6584", width=2.5, dash='dot')
+    ),
+    secondary_y=True
+)
 
-# Continuous smooth loop execution
+# Current Operating Point Pin Marker
+fig_2d.add_trace(
+    go.Scatter(
+        x=[cycle_val],
+        y=[voltage],
+        name="Live Point",
+        mode="markers",
+        marker=dict(size=12, color="#38BDF8", symbol="diamond", line=dict(color="#FAFAFA", width=2))
+    ),
+    secondary_y=False
+)
+
+fig_2d.update_layout(
+    height=360,
+    paper_bgcolor='rgba(15, 23, 42, 0.78)',
+    plot_bgcolor='rgba(15, 23, 42, 0.65)',
+    margin=dict(l=20, r=20, t=35, b=25),
+    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color="#FAFAFA")),
+    hovermode="x unified"
+)
+
+fig_2d.update_xaxes(title_text="Cycle Count", gridcolor="rgba(255,255,255,0.08)", color="#94A3B8")
+fig_2d.update_yaxes(title_text="Voltage (V)", gridcolor="rgba(255,255,255,0.08)", color="#556B2F", secondary_y=False, range=[3.1, 4.3])
+fig_2d.update_yaxes(title_text="Temperature (°C)", gridcolor="rgba(255,255,255,0.08)", color="#FF6584", secondary_y=True, range=[20, 70])
+
+st.plotly_chart(fig_2d, use_container_width=True)
+
+# Continuous auto-refresh
 time.sleep(1)
 st.rerun()
