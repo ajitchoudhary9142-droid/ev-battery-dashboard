@@ -20,29 +20,24 @@ def get_base64_bg(image_file):
 
 bg_base64 = get_base64_bg("car_bg.jpg")
 
-# CSS with Fair White overlay & the uploaded car image
+# 100% ORIGINAL IMAGE (NO FADED WHITE OVERLAY)
 if bg_base64:
     bg_style = f"""
-        background: 
-            linear-gradient(rgba(250, 250, 250, 0.86), rgba(250, 250, 250, 0.92)),
-            url('data:image/jpeg;base64,{bg_base64}') !important;
+        background: url('data:image/jpeg;base64,{bg_base64}') no-repeat center center fixed !important;
     """
 else:
     bg_style = """
-        background: 
-            linear-gradient(rgba(250, 250, 250, 0.88), rgba(250, 250, 250, 0.93)),
-            url('https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1920&q=80') !important;
+        background: url('https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed !important;
     """
 
 st.markdown(f"""
 <style>
+    /* Full original HD background */
     .stApp {{
         {bg_style}
         background-size: cover !important;
-        background-position: center !important;
-        background-attachment: fixed !important;
         font-family: 'Trebuchet MS', 'Segoe UI', sans-serif !important;
-        color: #1A202C !important;
+        color: #FAFAFA !important;
     }}
 
     .bolt {{
@@ -51,62 +46,60 @@ st.markdown(f"""
         height: 8px;
         background: radial-gradient(circle, #CBD5E1 40%, #64748B 90%);
         border-radius: 50%;
-        box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+        box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     }}
     .b-tl {{ top: 6px; left: 6px; }}
     .b-tr {{ top: 6px; right: 6px; }}
     .b-bl {{ bottom: 6px; left: 6px; }}
     .b-br {{ bottom: 6px; right: 6px; }}
 
-    /* Solid Olive Green Hexagon */
+    /* 1. SOLID VIBRANT OLIVE GREEN HEXAGON */
     .shape-olive-hex {{
         position: relative;
-        background: linear-gradient(145deg, #556B2F, #425424);
-        color: #FFFFFF !important;
+        background: linear-gradient(145deg, rgba(85, 107, 47, 0.95), rgba(50, 65, 25, 0.95));
+        color: #FAFAFA !important;
         padding: 22px 18px;
         clip-path: polygon(15px 0%, 100% 0%, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0% 100%, 0% 15px);
-        box-shadow: 0 10px 20px rgba(85, 107, 47, 0.35);
-        border: 2px solid #6B8E23;
-        transition: 0.3s;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+        border: 2px solid #84A346;
+        backdrop-filter: blur(4px);
     }}
-    .shape-olive-hex:hover {{ transform: scale(1.02); }}
 
-    /* Solid Light Pink Capsule */
+    /* 2. SOLID VIBRANT LIGHT PINK CAPSULE */
     .shape-pink-pill {{
         position: relative;
-        background: linear-gradient(145deg, #FFE4E8, #FFC0CB);
+        background: linear-gradient(145deg, rgba(255, 228, 232, 0.95), rgba(255, 182, 193, 0.95));
         color: #881337 !important;
         padding: 22px 20px;
         border-radius: 35px 8px 35px 8px;
-        box-shadow: 0 10px 20px rgba(255, 182, 193, 0.45);
-        border: 2px solid #FB7185;
-        transition: 0.3s;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+        border: 2px solid #FF6584;
+        backdrop-filter: blur(4px);
     }}
-    .shape-pink-pill:hover {{ transform: scale(1.02); }}
 
-    /* Solid Sky Blue Quad */
+    /* 3. SOLID VIBRANT SKY BLUE QUAD */
     .shape-blue-quad {{
         position: relative;
-        background: linear-gradient(145deg, #0284C7, #0369A1);
-        color: #FFFFFF !important;
+        background: linear-gradient(145deg, rgba(2, 132, 199, 0.95), rgba(14, 165, 233, 0.95));
+        color: #FAFAFA !important;
         padding: 22px 18px;
         border-radius: 8px 30px 8px 30px;
-        box-shadow: 0 10px 20px rgba(2, 132, 199, 0.35);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
         border: 2px solid #38BDF8;
-        transition: 0.3s;
+        backdrop-filter: blur(4px);
     }}
-    .shape-blue-quad:hover {{ transform: scale(1.02); }}
 
-    /* Solid Fair White Machined Casing */
+    /* 4. SOLID FAIR WHITE INDUSTRIAL CASING */
     .shape-white-case {{
         position: relative;
-        background: #FFFFFF;
+        background: rgba(250, 250, 250, 0.95);
         color: #1E293B !important;
         padding: 20px;
         border-radius: 12px;
         border: 2px solid #E2E8F0;
-        border-left: 6px solid #556B2F;
-        box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        border-left: 7px solid #556B2F;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
     }}
 
     .hud-title {{
@@ -115,7 +108,7 @@ st.markdown(f"""
         letter-spacing: 1.5px;
         text-transform: uppercase;
         margin-bottom: 6px;
-        opacity: 0.9;
+        opacity: 0.95;
     }}
 
     .hud-val {{
@@ -125,25 +118,27 @@ st.markdown(f"""
         letter-spacing: 0.5px;
     }}
 
+    /* Top Cockpit Header */
     .cockpit-banner {{
-        background: linear-gradient(90deg, #1E293B 0%, #334155 50%, #1E293B 100%);
-        border: 3px solid #64748B;
+        background: linear-gradient(90deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 50%, rgba(15, 23, 42, 0.95) 100%);
+        border: 2px solid #38BDF8;
         border-top: 5px solid #556B2F;
         color: #FAFAFA;
         padding: 16px 24px;
         border-radius: 14px;
         margin-bottom: 25px;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.7);
         display: flex;
         justify-content: space-between;
         align-items: center;
+        backdrop-filter: blur(6px);
     }}
 </style>
 """, unsafe_allow_html=True)
 
 # ----------------- SIDEBAR CONTROLS -----------------
 with st.sidebar:
-    st.markdown("<h2 style='color:#556B2F; margin:0;'>🏎️ TELEMETRY PIT-STOP</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color:#556B2F; margin:0;'>🏎️ PIT-STOP CONSOLE</h2>", unsafe_allow_html=True)
     st.caption("Vehicle ECU Diagnostic Terminal")
     st.markdown("---")
     
@@ -156,10 +151,10 @@ with st.sidebar:
         <div style='background:#556B2F; color:#FFF; padding:10px; border-radius:8px; font-weight:700; font-size:12px; margin-bottom:10px; text-align:center;'>
             ⚙️ POWERTRAIN: LINKED
         </div>
-        <div style='background:#38BDF8; color:#0369A1; padding:10px; border-radius:8px; font-weight:700; font-size:12px; margin-bottom:10px; text-align:center;'>
+        <div style='background:#0284C7; color:#FFF; padding:10px; border-radius:8px; font-weight:700; font-size:12px; margin-bottom:10px; text-align:center;'>
             🔋 EV CHARGER: CONNECTED
         </div>
-        <div style='background:#FFE4E8; color:#9F1239; border:1px solid #FB7185; padding:10px; border-radius:8px; font-weight:700; font-size:12px; text-align:center;'>
+        <div style='background:#FFE4E8; color:#9F1239; border:1px solid #FF6584; padding:10px; border-radius:8px; font-weight:700; font-size:12px; text-align:center;'>
             🔧 THERMAL CHOPPER: READY
         </div>
     """, unsafe_allow_html=True)
@@ -190,8 +185,8 @@ st.markdown(f"""
             <h1 style="margin:2px 0 0 0; font-size:24px; color:#FAFAFA; font-weight:900;">🏎️ EV BATTERY LIVE MONITORING CONSOLE</h1>
         </div>
         <div style="text-align:right;">
-            <div style="background:#556B2F; color:#FFF; font-weight:800; padding:6px 16px; border-radius:20px; font-size:12px; display:inline-block;">
-                ● LIVE CHARGING / CAN-BUS FEED
+            <div style="background:#556B2F; color:#FFF; font-weight:800; padding:6px 16px; border-radius:20px; font-size:12px; display:inline-block; border:1px solid #84A346;">
+                ● LIVE CHARGING / CAN-BUS
             </div>
         </div>
     </div>
@@ -207,7 +202,7 @@ with r1:
             <div class="bolt b-bl"></div>
             <div class="hud-title">CHASSIS PACK ID</div>
             <div class="hud-val">#01-EV</div>
-            <div style="font-size:11px; opacity:0.85; margin-top:4px;">LITHIUM-ION MODULE</div>
+            <div style="font-size:11px; opacity:0.9; margin-top:4px;">LITHIUM-ION MODULE</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -218,7 +213,7 @@ with r2:
             <div class="bolt b-br"></div>
             <div class="hud-title">MILEAGE CYCLES</div>
             <div class="hud-val">{cycle_val}</div>
-            <div style="font-size:11px; opacity:0.85; margin-top:4px;">TOTAL DRIVE CYCLES</div>
+            <div style="font-size:11px; opacity:0.9; margin-top:4px;">TOTAL DRIVE CYCLES</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -229,7 +224,7 @@ with r3:
             <div class="bolt b-bl"></div>
             <div class="hud-title" style="color:#881337;">CELL TEMPERATURE</div>
             <div class="hud-val" style="color:#881337;">{temp:.2f} °C</div>
-            <div style="font-size:11px; opacity:0.85; margin-top:4px; color:#881337;">CORE THERMAL SENSOR</div>
+            <div style="font-size:11px; opacity:0.9; margin-top:4px; color:#881337;">CORE THERMAL SENSOR</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -240,14 +235,14 @@ with r4:
             <div class="bolt b-br"></div>
             <div class="hud-title">ACTUAL SOH (HEALTH)</div>
             <div class="hud-val">{actual_soh:.2f}%</div>
-            <div style="font-size:11px; opacity:0.85; margin-top:4px;">CAPACITY RETENTION</div>
+            <div style="font-size:11px; opacity:0.9; margin-top:4px;">CAPACITY RETENTION</div>
         </div>
     """, unsafe_allow_html=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ----------------- AI HEALTH SECTION -----------------
-st.markdown("<h3 style='color:#556B2F; font-size:18px; font-weight:800; letter-spacing:1px;'>⚙️ AI DIAGNOSTIC & HEALTH CLUSTER</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='color:#38BDF8; font-size:18px; font-weight:800; letter-spacing:1px; text-shadow:0 2px 4px #000;'>⚙️ AI DIAGNOSTIC & HEALTH CLUSTER</h3>", unsafe_allow_html=True)
 
 a1, a2, a3 = st.columns([1, 1, 1.2])
 
@@ -267,7 +262,7 @@ with a2:
             <div class="bolt b-tl"></div>
             <div class="hud-title" style="color:#881337;">PREDICTION ERROR</div>
             <div class="hud-val" style="color:#881337;">{pred_error:.2f}%</div>
-            <div style="font-size:12px; opacity:0.85; margin-top:4px; color:#881337;">Dynamic Residual Drift</div>
+            <div style="font-size:12px; opacity:0.9; margin-top:4px; color:#881337;">Dynamic Residual Drift</div>
         </div>
     """, unsafe_allow_html=True)
 
@@ -277,7 +272,7 @@ with a3:
     st.markdown(f"""
         <div class="shape-white-case" style="border-left:7px solid #0284C7; text-align:center; padding:18px;">
             <div class="hud-title" style="color:#0284C7;">BATTERY PACK STATUS VERDICT</div>
-            <div style="background:{status_color}; color:#FFF; font-weight:900; font-size:18px; padding:8px 24px; border-radius:30px; display:inline-block; margin-top:6px; box-shadow:0 4px 10px rgba(0,0,0,0.15);">
+            <div style="background:{status_color}; color:#FFF; font-weight:900; font-size:18px; padding:8px 24px; border-radius:30px; display:inline-block; margin-top:6px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
                 ● {status_text}
             </div>
         </div>
@@ -286,7 +281,7 @@ with a3:
 st.markdown("<br>", unsafe_allow_html=True)
 
 # ----------------- ELECTRICAL TELEMETRY -----------------
-st.markdown("<h3 style='color:#0284C7; font-size:18px; font-weight:800; letter-spacing:1px;'>⚡ POWERTRAIN ELECTRICAL TELEMETRY</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='color:#38BDF8; font-size:18px; font-weight:800; letter-spacing:1px; text-shadow:0 2px 4px #000;'>⚡ POWERTRAIN ELECTRICAL TELEMETRY</h3>", unsafe_allow_html=True)
 
 e1, e2, e3, e4 = st.columns(4)
 
@@ -305,7 +300,7 @@ with e2:
             <div class="bolt b-bl"></div>
             <div class="hud-title">CURRENT DRAW</div>
             <div class="hud-val">{current:.2f} A</div>
-            <div style="font-size:11px; opacity:0.85;">CHARGING / DRIVE LOAD</div>
+            <div style="font-size:11px; opacity:0.9;">CHARGING / DRIVE LOAD</div>
         </div>
     """, unsafe_allow_html=True)
 
