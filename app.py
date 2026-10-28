@@ -1,6 +1,8 @@
 import streamlit as st
 import numpy as np
 import time
+import base64
+import os
 
 st.set_page_config(
     page_title="EV Cockpit & Telemetry HUD",
@@ -8,37 +10,56 @@ st.set_page_config(
     layout="wide"
 )
 
-# ----------------- MECHANICAL COCKPIT THEME (FAIR WHITE BASE + EV FUTURISTIC CAR BG) -----------------
-st.markdown("""
-<style>
-    /* Futuristic EV Charging Car Background with Fair White Overlay */
-    .stApp {
+# Function to load local image as base64 background
+def get_base64_bg(image_file):
+    if os.path.exists(image_file):
+        with open(image_file, "rb") as f:
+            data = f.read()
+        return base64.b64encode(data).decode()
+    return ""
+
+bg_base64 = get_base64_bg("car_bg.jpg")
+
+# CSS with Fair White overlay & the uploaded car image
+if bg_base64:
+    bg_style = f"""
+        background: 
+            linear-gradient(rgba(250, 250, 250, 0.86), rgba(250, 250, 250, 0.92)),
+            url('data:image/jpeg;base64,{bg_base64}') !important;
+    """
+else:
+    bg_style = """
         background: 
             linear-gradient(rgba(250, 250, 250, 0.88), rgba(250, 250, 250, 0.93)),
             url('https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1920&q=80') !important;
+    """
+
+st.markdown(f"""
+<style>
+    .stApp {{
+        {bg_style}
         background-size: cover !important;
         background-position: center !important;
         background-attachment: fixed !important;
         font-family: 'Trebuchet MS', 'Segoe UI', sans-serif !important;
         color: #1A202C !important;
-    }
+    }}
 
-    /* Bolt / Rivet for Mechanical Realism */
-    .bolt {
+    .bolt {{
         position: absolute;
         width: 8px;
         height: 8px;
         background: radial-gradient(circle, #CBD5E1 40%, #64748B 90%);
         border-radius: 50%;
         box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
-    }
-    .b-tl { top: 6px; left: 6px; }
-    .b-tr { top: 6px; right: 6px; }
-    .b-bl { bottom: 6px; left: 6px; }
-    .b-br { bottom: 6px; right: 6px; }
+    }}
+    .b-tl {{ top: 6px; left: 6px; }}
+    .b-tr {{ top: 6px; right: 6px; }}
+    .b-bl {{ bottom: 6px; left: 6px; }}
+    .b-br {{ bottom: 6px; right: 6px; }}
 
-    /* 1. SOLID FILLED OLIVE GREEN HEXAGONAL BOX */
-    .shape-olive-hex {
+    /* Solid Olive Green Hexagon */
+    .shape-olive-hex {{
         position: relative;
         background: linear-gradient(145deg, #556B2F, #425424);
         color: #FFFFFF !important;
@@ -47,11 +68,11 @@ st.markdown("""
         box-shadow: 0 10px 20px rgba(85, 107, 47, 0.35);
         border: 2px solid #6B8E23;
         transition: 0.3s;
-    }
-    .shape-olive-hex:hover { transform: scale(1.02); }
+    }}
+    .shape-olive-hex:hover {{ transform: scale(1.02); }}
 
-    /* 2. SOLID FILLED LIGHT PINK ROUNDED CAPSULE BOX */
-    .shape-pink-pill {
+    /* Solid Light Pink Capsule */
+    .shape-pink-pill {{
         position: relative;
         background: linear-gradient(145deg, #FFE4E8, #FFC0CB);
         color: #881337 !important;
@@ -60,11 +81,11 @@ st.markdown("""
         box-shadow: 0 10px 20px rgba(255, 182, 193, 0.45);
         border: 2px solid #FB7185;
         transition: 0.3s;
-    }
-    .shape-pink-pill:hover { transform: scale(1.02); }
+    }}
+    .shape-pink-pill:hover {{ transform: scale(1.02); }}
 
-    /* 3. SOLID FILLED SKY BLUE BEVELED QUAD BOX */
-    .shape-blue-quad {
+    /* Solid Sky Blue Quad */
+    .shape-blue-quad {{
         position: relative;
         background: linear-gradient(145deg, #0284C7, #0369A1);
         color: #FFFFFF !important;
@@ -73,11 +94,11 @@ st.markdown("""
         box-shadow: 0 10px 20px rgba(2, 132, 199, 0.35);
         border: 2px solid #38BDF8;
         transition: 0.3s;
-    }
-    .shape-blue-quad:hover { transform: scale(1.02); }
+    }}
+    .shape-blue-quad:hover {{ transform: scale(1.02); }}
 
-    /* 4. SOLID FAIR WHITE INDUSTRIAL MACHINED CASING */
-    .shape-white-case {
+    /* Solid Fair White Machined Casing */
+    .shape-white-case {{
         position: relative;
         background: #FFFFFF;
         color: #1E293B !important;
@@ -86,26 +107,25 @@ st.markdown("""
         border: 2px solid #E2E8F0;
         border-left: 6px solid #556B2F;
         box-shadow: 0 6px 16px rgba(0,0,0,0.06);
-    }
+    }}
 
-    .hud-title {
+    .hud-title {{
         font-size: 11px;
         font-weight: 800;
         letter-spacing: 1.5px;
         text-transform: uppercase;
         margin-bottom: 6px;
         opacity: 0.9;
-    }
+    }}
 
-    .hud-val {
+    .hud-val {{
         font-size: 32px;
         font-weight: 900;
         font-family: 'Impact', 'Arial Black', sans-serif;
         letter-spacing: 0.5px;
-    }
+    }}
 
-    /* Top Cockpit Instrument Banner */
-    .cockpit-banner {
+    .cockpit-banner {{
         background: linear-gradient(90deg, #1E293B 0%, #334155 50%, #1E293B 100%);
         border: 3px solid #64748B;
         border-top: 5px solid #556B2F;
@@ -117,11 +137,11 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         align-items: center;
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------- SIDEBAR: CAR WORKSHOP CONTROLS -----------------
+# ----------------- SIDEBAR CONTROLS -----------------
 with st.sidebar:
     st.markdown("<h2 style='color:#556B2F; margin:0;'>🏎️ TELEMETRY PIT-STOP</h2>", unsafe_allow_html=True)
     st.caption("Vehicle ECU Diagnostic Terminal")
@@ -144,7 +164,7 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
-# ----------------- CONTINUOUS DATA SYNTHESIS -----------------
+# ----------------- CONTINUOUS TELEMETRY -----------------
 if "tick" not in st.session_state:
     st.session_state.tick = aging_sim
 
@@ -162,7 +182,7 @@ temp = np.clip(31.5 + (cycle_val * 0.018) + abs(current) * 0.42, 25.0, 65.0)
 capacity = np.clip(3.0 * (actual_soh / 100.0), 2.100, 3.000)
 resistance = np.clip(0.040 + (cycle_val / 1000.0) * 0.024, 0.035, 0.065)
 
-# ----------------- TOP VEHICLE COCKPIT BANNER -----------------
+# ----------------- TOP BANNER -----------------
 st.markdown(f"""
     <div class="cockpit-banner">
         <div>
@@ -177,7 +197,7 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-# ----------------- ROW 1: PRIMARY METRICS IN DIFFERENT FILLED SHAPES -----------------
+# ----------------- METRIC CARDS -----------------
 r1, r2, r3, r4 = st.columns(4)
 
 with r1:
@@ -226,7 +246,7 @@ with r4:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ----------------- SECTION 2: AI BATTERY HEALTH -----------------
+# ----------------- AI HEALTH SECTION -----------------
 st.markdown("<h3 style='color:#556B2F; font-size:18px; font-weight:800; letter-spacing:1px;'>⚙️ AI DIAGNOSTIC & HEALTH CLUSTER</h3>", unsafe_allow_html=True)
 
 a1, a2, a3 = st.columns([1, 1, 1.2])
@@ -265,7 +285,7 @@ with a3:
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# ----------------- SECTION 3: ELECTRICAL TELEMETRY -----------------
+# ----------------- ELECTRICAL TELEMETRY -----------------
 st.markdown("<h3 style='color:#0284C7; font-size:18px; font-weight:800; letter-spacing:1px;'>⚡ POWERTRAIN ELECTRICAL TELEMETRY</h3>", unsafe_allow_html=True)
 
 e1, e2, e3, e4 = st.columns(4)
@@ -307,6 +327,5 @@ with e4:
         </div>
     """, unsafe_allow_html=True)
 
-# Auto Refresh loop
 time.sleep(speed_rate)
 st.rerun()
