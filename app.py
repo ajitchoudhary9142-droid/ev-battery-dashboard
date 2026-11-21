@@ -8,7 +8,7 @@ import base64
 import os
 
 # -----------------------------------------------------------------------------
-# 1. PAGE SETUP (CINEMATIC EV LAUNCH + HIGH-CONTRAST DUAL-TONE COCKPIT)
+# 1. PAGE SETUP (PURE CAR SILHOUETTE LAUNCH + DUAL-TONE COCKPIT)
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="EV Battery OS // Telemetry Studio",
@@ -33,53 +33,59 @@ bg_img = (
 if "intro_played" not in st.session_state:
     st.session_state.intro_played = False
 
-# Play full racing car entrance only on initial load (or when Replay button is clicked)
 play_intro_now = not st.session_state.intro_played
 if play_intro_now:
     st.session_state.intro_played = True
 
 # -----------------------------------------------------------------------------
-# 2. CINEMATIC CAR RACING INTRO + SLIPSTREAM DATA REVEAL CSS
+# 2. ONLY CAR (NO BOX/BACKGROUND) RACING INTRO + REAR SLIPSTREAM REVEAL CSS
 # -----------------------------------------------------------------------------
 intro_css = f"""
-    /* Full-Screen Curtain that hides dashboard until car sweeps across */
-    @keyframes curtainWipe {{
+    /* Curtain wipes from Right to Left strictly behind the car's rear end */
+    @keyframes curtainRearWipe {{
         0%   {{ clip-path: inset(0 0 0 0); opacity: 1; }}
-        25%  {{ clip-path: inset(0 0 0 0); opacity: 1; }}
-        72%  {{ clip-path: inset(0 0 0 100%); opacity: 1; }}
-        100% {{ clip-path: inset(0 0 0 100%); opacity: 0; visibility: hidden; }}
+        20%  {{ clip-path: inset(0 0 0 0); opacity: 1; }}
+        82%  {{ clip-path: inset(0 100% 0 0); opacity: 1; }}
+        100% {{ clip-path: inset(0 100% 0 0); opacity: 0; visibility: hidden; }}
     }}
 
-    /* High-Speed EV Car Racing Across Screen */
-    @keyframes carRaceAcross {{
-        0%   {{ transform: translateX(-115vw) scale(0.92) skewX(-6deg); opacity: 0; }}
-        12%  {{ opacity: 1; }}
-        32%  {{ transform: translateX(-8vw) scale(1.03) skewX(-2deg); opacity: 1; }}
-        52%  {{ transform: translateX(4vw) scale(1.05) skewX(0deg); opacity: 1; }}
-        88%  {{ transform: translateX(120vw) scale(1.1) skewX(8deg); opacity: 1; }}
-        100% {{ transform: translateX(135vw) scale(1.1); opacity: 0; visibility: hidden; }}
+    /* Pure Car Racing Right -> Left (Facing Left) */
+    @keyframes pureCarRace {{
+        0%   {{ transform: translate3d(115vw, 0, 0) scale(0.95); opacity: 0; }}
+        8%   {{ opacity: 1; }}
+        30%  {{ transform: translate3d(10vw, 0, 0) scale(1.02); opacity: 1; }}
+        52%  {{ transform: translate3d(-8vw, 0, 0) scale(1.04); opacity: 1; }}
+        92%  {{ transform: translate3d(-120vw, 0, 0) scale(1.06); opacity: 1; }}
+        100% {{ transform: translate3d(-135vw, 0, 0) scale(1.06); opacity: 0; visibility: hidden; }}
     }}
 
-    /* Aerodynamic Speed Lines Behind Car */
-    @keyframes speedStreak {{
-        0%   {{ transform: translateX(-100vw); opacity: 0; }}
-        40%  {{ opacity: 0.9; }}
-        100% {{ transform: translateX(120vw); opacity: 0; }}
+    /* Wheel Rotation for Pure Vector Car */
+    @keyframes wheelSpin {{
+        0%   {{ transform: rotate(0deg); }}
+        100% {{ transform: rotate(-1440deg); }}
     }}
 
-    /* Dashboard Modules Emerging from Car's Slipstream Wake */
-    @keyframes wakeArrange {{
-        0%   {{ opacity: 0; transform: translateX(-75px) scale(0.92); filter: blur(8px); }}
-        100% {{ opacity: 1; transform: translateX(0px) scale(1); filter: blur(0px); }}
+    /* Rear Aerodynamic Slipstream Lines */
+    @keyframes rearStreak {{
+        0%   {{ transform: translate3d(110vw, 0, 0); opacity: 0; }}
+        35%  {{ opacity: 0.9; }}
+        100% {{ transform: translate3d(-120vw, 0, 0); opacity: 0; }}
+    }}
+
+    /* Dashboard Modules Emerging from Car's Rear Wake */
+    @keyframes rearWakeArrange {{
+        0%   {{ opacity: 0; transform: translate3d(65px, 0, 0) scale(0.95); }}
+        100% {{ opacity: 1; transform: translate3d(0px, 0, 0) scale(1); }}
     }}
 
     .intro-curtain {{
         position: fixed;
         inset: 0;
-        background: radial-gradient(circle at 50% 50%, #0F4C5C 0%, #061A21 100%);
+        background: radial-gradient(circle at 50% 50%, #092B34 0%, #030F13 100%);
         z-index: 99990;
         pointer-events: none;
-        animation: curtainWipe 2.7s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+        will-change: clip-path, opacity;
+        animation: curtainRearWipe 3.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
     }}
 
     .racing-car-stage {{
@@ -96,54 +102,38 @@ intro_css = f"""
         overflow: hidden;
     }}
 
-    .racing-car-card {{
-        width: 68vw;
-        max-width: 820px;
-        height: 44vh;
-        min-height: 280px;
-        background: {bg_img} no-repeat center center;
-        background-size: cover;
-        border-radius: 28px;
-        border: 2px solid rgba(125, 211, 252, 0.75);
-        box-shadow: -35px 0 80px rgba(56, 189, 248, 0.65), 0 25px 60px rgba(0, 0, 0, 0.85);
+    /* Pure Floating Car Only - No Border, No Card, No Background Box */
+    .pure-car-wrapper {{
+        width: 580px;
+        max-width: 85vw;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
         position: relative;
-        animation: carRaceAcross 2.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }}
-
-    .racing-car-badge {{
-        position: absolute;
-        bottom: 18px;
-        left: 24px;
-        background: rgba(6, 26, 33, 0.88);
-        color: #7DD3FC;
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 800;
-        font-size: 13px;
-        letter-spacing: 2px;
-        padding: 8px 18px;
-        border-radius: 999px;
-        border: 1px solid #38BDF8;
+        will-change: transform, opacity;
+        animation: pureCarRace 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
     }}
 
     .streak-line {{
         position: fixed;
-        height: 3px;
-        background: linear-gradient(90deg, transparent, #38BDF8, #FFFFFF);
+        height: 2.5px;
+        background: linear-gradient(270deg, transparent, #38BDF8, #FFFFFF);
         border-radius: 999px;
         z-index: 99995;
         pointer-events: none;
-        animation: speedStreak 1.8s ease-out forwards;
+        will-change: transform, opacity;
+        animation: rearStreak 2.4s ease-out forwards;
     }}
-    .s1 {{ top: 32%; width: 45vw; animation-delay: 0.35s; }}
-    .s2 {{ top: 52%; width: 60vw; animation-delay: 0.45s; }}
-    .s3 {{ top: 68%; width: 40vw; animation-delay: 0.55s; }}
+    .s1 {{ top: 38%; width: 42vw; animation-delay: 0.4s; }}
+    .s2 {{ top: 50%; width: 58vw; animation-delay: 0.5s; }}
+    .s3 {{ top: 61%; width: 38vw; animation-delay: 0.6s; }}
 
-    /* Staggered Slipstream Arrangement of UI Elements */
-    .wake-1 {{ opacity: 0; animation: wakeArrange 0.75s cubic-bezier(0.16, 1, 0.3, 1) 1.35s forwards; }}
-    .wake-2 {{ opacity: 0; animation: wakeArrange 0.75s cubic-bezier(0.16, 1, 0.3, 1) 1.55s forwards; }}
-    .wake-3 {{ opacity: 0; animation: wakeArrange 0.80s cubic-bezier(0.16, 1, 0.3, 1) 1.75s forwards; }}
-    .wake-4 {{ opacity: 0; animation: wakeArrange 0.80s cubic-bezier(0.16, 1, 0.3, 1) 1.95s forwards; }}
-    .wake-5 {{ opacity: 0; animation: wakeArrange 0.85s cubic-bezier(0.16, 1, 0.3, 1) 2.15s forwards; }}
+    /* Staggered Arrangement Trailing Behind the Car's Rear End */
+    .wake-1 {{ opacity: 0; will-change: transform, opacity; animation: rearWakeArrange 0.80s cubic-bezier(0.16, 1, 0.3, 1) 1.65s forwards; }}
+    .wake-2 {{ opacity: 0; will-change: transform, opacity; animation: rearWakeArrange 0.80s cubic-bezier(0.16, 1, 0.3, 1) 1.85s forwards; }}
+    .wake-3 {{ opacity: 0; will-change: transform, opacity; animation: rearWakeArrange 0.85s cubic-bezier(0.16, 1, 0.3, 1) 2.05s forwards; }}
+    .wake-4 {{ opacity: 0; will-change: transform, opacity; animation: rearWakeArrange 0.85s cubic-bezier(0.16, 1, 0.3, 1) 2.25s forwards; }}
+    .wake-5 {{ opacity: 0; will-change: transform, opacity; animation: rearWakeArrange 0.90s cubic-bezier(0.16, 1, 0.3, 1) 2.45s forwards; }}
 """ if play_intro_now else """
     .wake-1, .wake-2, .wake-3, .wake-4, .wake-5 {{ opacity: 1; }}
 """
@@ -213,7 +203,6 @@ st.markdown(f"""
     /* Top Precision Header */
     .cockpit-top {{
         background: rgba(255, 255, 255, 0.96);
-        backdrop-filter: blur(20px);
         border: 2px solid rgba(15, 76, 92, 0.25);
         border-left: 8px solid #0F4C5C;
         border-radius: 16px;
@@ -294,7 +283,6 @@ st.markdown(f"""
 
     .glass-panel {{
         background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(18px);
         border: 2px solid rgba(15, 76, 92, 0.22);
         border-radius: 16px;
         padding: 18px 22px;
@@ -304,7 +292,7 @@ st.markdown(f"""
 </style>
 """, unsafe_allow_html=True)
 
-# Render the Racing Car Transition Overlay on Initial Launch
+# Render ONLY the Transparent Neon Electric Car (No Background / No Box)
 if play_intro_now:
     st.markdown("""
         <div class="intro-curtain"></div>
@@ -312,8 +300,62 @@ if play_intro_now:
         <div class="streak-line s2"></div>
         <div class="streak-line s3"></div>
         <div class="racing-car-stage">
-            <div class="racing-car-card">
-                <div class="racing-car-badge">⚡ INITIALIZING EV TELEMETRY SLIPSTREAM...</div>
+            <div class="pure-car-wrapper">
+                <!-- Pure Transparent Aerodynamic EV Coupe (Facing Left, No Background) -->
+                <svg viewBox="0 0 800 260" width="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
+                    <defs>
+                        <linearGradient id="carBodyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#38BDF8"/>
+                            <stop offset="50%" stop-color="#0EA5E9"/>
+                            <stop offset="100%" stop-color="#0284C7"/>
+                        </linearGradient>
+                        <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#03131A" stop-opacity="0.95"/>
+                            <stop offset="100%" stop-color="#0F4C5C" stop-opacity="0.85"/>
+                        </linearGradient>
+                        <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="5" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    <!-- Headlight Beam (Left Front) -->
+                    <polygon points="48,158 -140,130 -140,185" fill="url(#carBodyGrad)" opacity="0.22"/>
+
+                    <!-- Lower Chassis & Aerodynamic Body (Facing Left) -->
+                    <path d="M 45 162 C 42 142, 72 125, 165 114 C 245 72, 365 56, 515 62 C 625 68, 705 95, 752 122 C 765 132, 768 155, 755 170 L 668 175 A 56 56 0 0 0 556 175 L 244 175 A 56 56 0 0 0 132 175 L 55 172 C 46 170, 45 166, 45 162 Z"
+                          fill="url(#carBodyGrad)" stroke="#BAE6FD" stroke-width="3" filter="url(#neonGlow)"/>
+
+                    <!-- Cabin Glass Canopy -->
+                    <path d="M 192 112 C 262 76, 368 64, 502 69 C 578 73, 635 90, 672 112 Z"
+                          fill="url(#glassGrad)" stroke="#7DD3FC" stroke-width="2"/>
+
+                    <!-- Window Pillar -->
+                    <line x1="415" y1="67" x2="405" y2="112" stroke="#38BDF8" stroke-width="3"/>
+
+                    <!-- Glowing LED Headlight (Front Left) -->
+                    <path d="M 56 146 L 105 138 L 95 149 Z" fill="#FFFFFF" filter="url(#neonGlow)"/>
+
+                    <!-- Glowing LED Taillight (Rear Right) -->
+                    <path d="M 756 130 L 725 132 L 732 142 L 758 140 Z" fill="#FF4D6D" filter="url(#neonGlow)"/>
+
+                    <!-- Front Wheel (Left) -->
+                    <g transform="translate(188, 175)">
+                        <circle cx="0" cy="0" r="46" fill="#06141B" stroke="#38BDF8" stroke-width="4"/>
+                        <circle cx="0" cy="0" r="30" fill="none" stroke="#BAE6FD" stroke-width="2.5" stroke-dasharray="14 8"/>
+                        <circle cx="0" cy="0" r="10" fill="#38BDF8"/>
+                    </g>
+
+                    <!-- Rear Wheel (Right) -->
+                    <g transform="translate(612, 175)">
+                        <circle cx="0" cy="0" r="46" fill="#06141B" stroke="#38BDF8" stroke-width="4"/>
+                        <circle cx="0" cy="0" r="30" fill="none" stroke="#BAE6FD" stroke-width="2.5" stroke-dasharray="14 8"/>
+                        <circle cx="0" cy="0" r="10" fill="#38BDF8"/>
+                    </g>
+                </svg>
             </div>
         </div>
     """, unsafe_allow_html=True)
@@ -664,7 +706,7 @@ with tab3:
         st.download_button("📥 Export 10K Telemetry CSV", csv_data, "ev_telemetry_studio.csv", "text/csv", use_container_width=True)
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Pause slightly longer on first run so the 2.7s racing intro completes smoothly before 1s ticker starts
+# Pause 3.7s on initial launch so the pure car transition finishes cleanly
 if auto_play:
-    time.sleep(2.8 if play_intro_now else 1.0)
+    time.sleep(3.7 if play_intro_now else 1.0)
     st.rerun()
