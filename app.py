@@ -7,198 +7,221 @@ import time
 import base64
 import os
 
+# -----------------------------------------------------------------------------
+# 1. PAGE CONFIGURATION (ULTRA-CLEAN MONOCHROME PRO CONSOLE)
+# -----------------------------------------------------------------------------
 st.set_page_config(
-    page_title="EV Circular Cockpit HUD",
-    page_icon="🏎️",
-    layout="wide"
+    page_title="EV Telemetry OS | 1M Neural Core",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
-# Load local car background image
 def get_base64_bg(image_file):
     if os.path.exists(image_file):
         with open(image_file, "rb") as f:
-            data = f.read()
-        return base64.b64encode(data).decode()
+            return base64.b64encode(f.read()).decode()
     return ""
 
 bg_base64 = get_base64_bg("car_bg.jpg")
-if bg_base64:
-    bg_img = f"url('data:image/jpeg;base64,{bg_base64}')"
-else:
-    bg_img = "url('https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1920&q=80')"
+bg_img = (
+    f"url('data:image/jpeg;base64,{bg_base64}')"
+    if bg_base64
+    else "url('https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1920&q=80')"
+)
 
-# ----------------- CSS: 25% LIGHT FILM + 8 CIRCULAR DIALS + BUBBLES + GREEN VAPOR -----------------
+# -----------------------------------------------------------------------------
+# 2. SINGLE-COLOR MONOCHROME PLATINUM & OBSIDIAN CSS ARCHITECTURE
+# -----------------------------------------------------------------------------
 st.markdown(f"""
 <style>
-    /* 25% Light Film Overlay on Original Futuristic EV Image */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700;800&display=swap');
+
+    /* Monochrome Obsidian Dark Glass over Desaturated Background */
     .stApp {{
         background: 
-            linear-gradient(rgba(250, 250, 250, 0.25), rgba(250, 250, 250, 0.25)),
+            radial-gradient(circle at 50% 20%, rgba(15, 17, 21, 0.72), rgba(7, 8, 10, 0.94)),
             {bg_img} no-repeat center center fixed !important;
         background-size: cover !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-        color: #FAFAFA !important;
+        background-blend-mode: luminosity;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        color: #F8FAFC !important;
         overflow-x: hidden !important;
     }}
 
-    /* Floating Bubbles */
-    @keyframes floatUp {{
-        0% {{ transform: translateY(105vh) scale(0.6); opacity: 0; }}
-        30% {{ opacity: 0.7; }}
-        80% {{ opacity: 0.5; }}
-        100% {{ transform: translateY(-20vh) scale(1.2); opacity: 0; }}
+    /* Hide default Streamlit chrome for pure OS look */
+    header[data-testid="stHeader"] {{ background: transparent !important; }}
+    #MainMenu {{ visibility: hidden; }}
+    footer {{ visibility: hidden; }}
+
+    /* Subtle Monochrome Ambient Particles */
+    @keyframes floatParticle {{
+        0% {{ transform: translateY(105vh) scale(0.8); opacity: 0; }}
+        40% {{ opacity: 0.45; }}
+        80% {{ opacity: 0.25; }}
+        100% {{ transform: translateY(-15vh) scale(1.1); opacity: 0; }}
     }}
-    .bubble {{
+    .mono-orb {{
         position: fixed;
-        bottom: -50px;
-        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.85), rgba(56, 189, 248, 0.35));
-        border: 1px solid rgba(255, 255, 255, 0.6);
+        bottom: -40px;
+        background: radial-gradient(circle, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.05) 70%);
         border-radius: 50%;
-        box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
         pointer-events: none;
         z-index: 999;
-        animation: floatUp 8s infinite ease-in;
+        animation: floatParticle 10s infinite ease-in-out;
     }}
-    .b1 {{ left: 8%; width: 22px; height: 22px; animation-duration: 7s; }}
-    .b2 {{ left: 26%; width: 32px; height: 32px; animation-duration: 9s; animation-delay: 2s; }}
-    .b3 {{ left: 48%; width: 18px; height: 18px; animation-duration: 6.5s; animation-delay: 4s; }}
-    .b4 {{ left: 71%; width: 28px; height: 28px; animation-duration: 8.5s; animation-delay: 1.5s; }}
-    .b5 {{ left: 89%; width: 36px; height: 36px; animation-duration: 10s; animation-delay: 3s; }}
+    .o1 {{ left: 12%; width: 10px; height: 10px; animation-duration: 9s; }}
+    .o2 {{ left: 32%; width: 16px; height: 16px; animation-duration: 12s; animation-delay: 2s; }}
+    .o3 {{ left: 55%; width: 8px; height: 8px; animation-duration: 8s; animation-delay: 4s; }}
+    .o4 {{ left: 76%; width: 14px; height: 14px; animation-duration: 11s; animation-delay: 1s; }}
+    .o5 {{ left: 90%; width: 12px; height: 12px; animation-duration: 10s; animation-delay: 3s; }}
 
-    /* Float animation for circles */
-    @keyframes pulseFloat {{
-        0% {{ transform: translateY(0px); }}
-        50% {{ transform: translateY(-7px); }}
-        100% {{ transform: translateY(0px); }}
+    /* Top Google/Tesla Style Precision Header */
+    .os-header {{
+        background: rgba(15, 17, 21, 0.78);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 16px;
+        padding: 16px 28px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+    }}
+    .os-badge {{
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        color: #FFFFFF;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 999px;
+        letter-spacing: 1px;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
     }}
 
-    /* CIRCULAR DIAL PODS (100% ROUND) */
-    .circle-pod {{
-        width: 195px;
-        height: 195px;
+    /* Monochromatic Precision Circular Dial Pods */
+    @keyframes subtlePulse {{
+        0% {{ box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.06); }}
+        50% {{ box-shadow: 0 16px 40px rgba(255, 255, 255, 0.12), inset 0 0 28px rgba(255, 255, 255, 0.14); }}
+        100% {{ box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.06); }}
+    }}
+
+    .mono-dial {{
+        width: 192px;
+        height: 192px;
         border-radius: 50%;
         margin: 0 auto;
+        background: radial-gradient(circle at 30% 25%, rgba(36, 40, 48, 0.92), rgba(10, 12, 15, 0.96));
+        border: 1.5px solid rgba(255, 255, 255, 0.25);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         text-align: center;
-        padding: 15px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65), inset 0 0 18px rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(6px);
-        transition: transform 0.3s ease;
-        animation: pulseFloat 4.5s ease-in-out infinite;
+        padding: 16px;
+        backdrop-filter: blur(16px);
+        transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        animation: subtlePulse 4s infinite ease-in-out;
+        position: relative;
     }}
-    .circle-pod:hover {{
-        transform: scale(1.06);
+    .mono-dial::before {{
+        content: '';
+        position: absolute;
+        inset: 6px;
+        border-radius: 50%;
+        border: 1px dashed rgba(255, 255, 255, 0.16);
+        pointer-events: none;
     }}
-
-    /* 4 Theme Colors for Circles */
-    .c-olive {{
-        background: radial-gradient(circle at 30% 30%, rgba(107, 142, 35, 0.94), rgba(66, 84, 36, 0.96));
-        border: 4px solid #A3E635;
-        color: #FAFAFA !important;
-    }}
-    .c-skyblue {{
-        background: radial-gradient(circle at 30% 30%, rgba(56, 189, 248, 0.92), rgba(3, 105, 161, 0.96));
-        border: 4px solid #BAE6FD;
-        color: #FAFAFA !important;
-        margin-top: 22px; /* Staggered offset */
-    }}
-    .c-lightpink {{
-        background: radial-gradient(circle at 30% 30%, rgba(255, 228, 232, 0.96), rgba(255, 182, 193, 0.95));
-        border: 4px solid #FF6584;
-        color: #881337 !important;
-    }}
-    .c-fairwhite {{
-        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.95));
-        border: 4px solid #556B2F;
-        color: #1E293B !important;
-        margin-top: 22px; /* Staggered offset */
+    .mono-dial:hover {{
+        transform: translateY(-6px) scale(1.04);
+        border-color: rgba(255, 255, 255, 0.85);
+        box-shadow: 0 20px 45px rgba(255, 255, 255, 0.18);
     }}
 
-    .c-title {{
-        font-size: 10.5px;
-        font-weight: 800;
-        letter-spacing: 1.2px;
+    .dial-offset {{
+        margin-top: 22px;
+    }}
+
+    .dial-label {{
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 1.8px;
         text-transform: uppercase;
-        margin-bottom: 4px;
-        opacity: 0.9;
+        color: #94A3B8;
+        margin-bottom: 6px;
     }}
-    .c-val {{
-        font-size: 28px;
-        font-weight: 900;
-        font-family: 'Impact', 'Arial Black', sans-serif;
+    .dial-value {{
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 27px;
+        font-weight: 800;
+        color: #FFFFFF;
+        text-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
         line-height: 1.1;
     }}
-    .c-sub {{
+    .dial-meta {{
+        font-family: 'JetBrains Mono', monospace;
         font-size: 10px;
-        margin-top: 5px;
-        font-weight: 600;
-        opacity: 0.85;
+        color: #CBD5E1;
+        margin-top: 6px;
+        opacity: 0.75;
     }}
 
-    /* Interactive Control Panel Styling */
-    div[data-testid="stHorizontalBlock"] {{
-        align-items: center;
-    }}
-
-    /* Green Rising Vapor at Bottom */
-    @keyframes vaporRise {{
-        0% {{ opacity: 0.5; }}
-        50% {{ opacity: 0.85; }}
-        100% {{ opacity: 0.5; }}
-    }}
-    .green-vapor-zone {{
+    /* Bottom Subtle Platinum Mist Glow */
+    .platinum-mist {{
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100vw;
-        height: 115px;
+        height: 90px;
         pointer-events: none;
         z-index: 998;
-        background: linear-gradient(to top, rgba(85, 107, 47, 0.65) 0%, rgba(107, 142, 35, 0.25) 55%, transparent 100%);
-        animation: vaporRise 5s ease-in-out infinite alternate;
-        filter: blur(10px);
+        background: linear-gradient(to top, rgba(255, 255, 255, 0.09) 0%, transparent 100%);
+        filter: blur(8px);
     }}
 </style>
 
-<div class="bubble b1"></div>
-<div class="bubble b2"></div>
-<div class="bubble b3"></div>
-<div class="bubble b4"></div>
-<div class="bubble b5"></div>
-<div class="green-vapor-zone"></div>
+<div class="mono-orb o1"></div>
+<div class="mono-orb o2"></div>
+<div class="mono-orb o3"></div>
+<div class="mono-orb o4"></div>
+<div class="mono-orb o5"></div>
+<div class="platinum-mist"></div>
 """, unsafe_allow_html=True)
 
-# ----------------- 1 LAKH (100,000) REALISTIC DYNAMIC DRIVE DATASET -----------------
+# -----------------------------------------------------------------------------
+# 3. 10,00,000 (1 MILLION / 10 LAKH) VECTORIZED TELEMETRY ENGINE
+# -----------------------------------------------------------------------------
 @st.cache_data
-def build_realistic_1lakh_dataset():
-    np.random.seed(42)
-    n = 100000
-    t = np.arange(n)
+def generate_1_million_telemetry():
+    np.random.seed(2026)
+    n = 1_000_000  # 10 Lakh high-resolution telemetry records
+    t = np.arange(n, dtype=np.int32)
     
-    # Gradual SOH degradation over 100k time-steps (1 to 1200 cycles)
-    cycles = np.linspace(100, 1200, n)
-    actual_soh = np.clip(99.5 - (cycles / 1200.0) * 24.0 + 0.3 * np.sin(t / 150.0), 70.0, 100.0)
+    cycles = np.linspace(1, 1500, n, dtype=np.float32)
+    actual_soh = np.clip(99.8 - (cycles / 1500.0) * 26.5 + 0.25 * np.sin(t / 400.0), 68.0, 100.0)
     
-    # Realistic Dynamic Drive Waves (Acceleration spikes + Regenerative braking + Charging pulses)
-    drive_wave = np.sin(t / 12.0) * 14.0 + np.cos(t / 5.0) * 7.0 + np.random.normal(0, 1.5, n)
-    current = np.clip(6.0 + drive_wave, -25.0, 30.0)
+    # Multi-harmonic realistic driving current profile
+    drive_wave = (
+        np.sin(t / 18.0) * 13.0
+        + np.cos(t / 7.0) * 6.5
+        + np.random.normal(0, 1.1, n)
+    )
+    current = np.clip(5.5 + drive_wave, -25.0, 30.0).astype(np.float32)
     
-    # Voltage drops when current spikes (V = OCV - I*R)
-    r_internal = 0.040 + (cycles / 1200.0) * 0.022
-    ocv = 3.75 + 0.35 * (actual_soh / 100.0) + 0.12 * np.sin(t / 40.0)
-    voltage = np.clip(ocv - (current * r_internal * 0.35) + np.random.normal(0, 0.015, n), 3.20, 4.20)
+    r_internal = (0.038 + (cycles / 1500.0) * 0.024).astype(np.float32)
+    ocv = 3.74 + 0.36 * (actual_soh / 100.0) + 0.11 * np.sin(t / 55.0)
+    voltage = np.clip(ocv - (current * r_internal * 0.36) + np.random.normal(0, 0.01, n), 3.20, 4.20).astype(np.float32)
     
-    # Realistic Thermal Wave (heats up during high current, cools down on low current)
-    temp = np.clip(29.0 + (cycles * 0.014) + (np.abs(current) * 0.55) + 2.5 * np.sin(t / 25.0), 25.0, 65.0)
-    
-    capacity = np.clip(3.0 * (actual_soh / 100.0), 2.10, 3.00)
+    temp = np.clip(28.5 + (cycles * 0.014) + (np.abs(current) * 0.48) + 2.2 * np.sin(t / 35.0), 25.0, 65.0).astype(np.float32)
+    capacity = np.clip(3.0 * (actual_soh / 100.0), 2.05, 3.00).astype(np.float32)
     
     return pd.DataFrame({
-        "step": t,
-        "cycle": cycles.astype(int),
+        "frame": t,
+        "cycle": cycles.astype(np.int32),
         "actual_soh": actual_soh,
         "voltage": voltage,
         "current": current,
@@ -207,218 +230,306 @@ def build_realistic_1lakh_dataset():
         "resistance": r_internal
     })
 
-df_1lakh = build_realistic_1lakh_dataset()
+df_1m = generate_1_million_telemetry()
 
-# ----------------- TOP COCKPIT HEADER -----------------
+if "frame_idx" not in st.session_state:
+    st.session_state.frame_idx = 285400
+
+# -----------------------------------------------------------------------------
+# 4. TOP MONOCHROME OS HEADER
+# -----------------------------------------------------------------------------
 st.markdown("""
-    <div style='background:linear-gradient(90deg, rgba(15,23,42,0.92), rgba(30,41,59,0.92)); border:2px solid #38BDF8; border-top:5px solid #556B2F; border-radius:40px; padding:12px 28px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 8px 25px rgba(0,0,0,0.6);'>
+    <div class="os-header">
         <div>
-            <div style='font-size:10px; letter-spacing:2px; color:#38BDF8; font-weight:800;'>INTERACTIVE VEHICLE TELEMETRY CONSOLE</div>
-            <h2 style='margin:0; font-size:20px; color:#FAFAFA; font-weight:900;'>🏎️ EV BATTERY CIRCULAR GAUGES & REALISTIC WAVEFORM</h2>
+            <div style="font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:2.5px; color:#94A3B8; font-weight:700;">
+                NEURAL TELEMETRY ARCHITECTURE // 1,000,000 DATA ENGINE
+            </div>
+            <h1 style="margin:4px 0 0 0; font-size:22px; font-weight:800; color:#FFFFFF; letter-spacing:-0.5px;">
+                EV BATTERY DIAGNOSTIC CONSOLE
+            </h1>
         </div>
-        <div style='background:#556B2F; color:#FFF; font-weight:800; padding:6px 16px; border-radius:20px; font-size:12px; border:1px solid #A3E635;'>
-            ● 1,00,000 LIVE TELEMETRY
+        <div class="os-badge">
+            ● 1.0M STREAM SYNCHRONIZED
         </div>
     </div>
 """, unsafe_allow_html=True)
 
-# ----------------- USER INTERACTIVE CONTROL BAR -----------------
-st.markdown("<div style='background:rgba(15,23,42,0.82); padding:10px 20px; border-radius:16px; border:1px solid #38BDF8; margin-bottom:18px;'>", unsafe_allow_html=True)
-ctrl1, ctrl2, ctrl3, ctrl4 = st.columns([1.3, 1.3, 1, 1])
+# -----------------------------------------------------------------------------
+# 5. INTERACTIVE CONTROL DECK
+# -----------------------------------------------------------------------------
+with st.expander("🎛️ **INTERACTIVE TELEMETRY & SIMULATION CONTROLS**", expanded=True):
+    c_ctrl1, c_ctrl2, c_ctrl3, c_ctrl4 = st.columns([1.3, 1.4, 1.1, 1])
+    
+    with c_ctrl1:
+        drive_mode = st.selectbox(
+            "Operating Profile",
+            ["Autonomous Urban (Balanced)", "Track Performance (High Draw)", "Regenerative Deceleration", "Supercharger DC (CC-CV)"],
+            index=0
+        )
+        throttle_pct = st.slider("Power Demand / Throttle (%)", 0, 100, 42)
 
-with ctrl1:
-    drive_mode = st.selectbox(
-        "🚦 Select Vehicle Mode",
-        ["City Traffic (Dynamic)", "Highway Sport (High Load)", "Fast Charging (CC Mode)"],
-        index=0
+    with c_ctrl2:
+        scrub_idx = st.slider(
+            "1,000,000-Frame Timeline Scrubber",
+            min_value=200,
+            max_value=999500,
+            value=st.session_state.frame_idx,
+            step=2500
+        )
+        if scrub_idx != st.session_state.frame_idx:
+            st.session_state.frame_idx = scrub_idx
+            
+        stream_rate = st.slider("Stream Step Velocity (Frames/Tick)", 1, 50, 12)
+
+    with c_ctrl3:
+        active_cooling = st.toggle("Cryo-Liquid Thermal Loop", value=False)
+        live_stream = st.toggle("Real-Time Auto Telemetry", value=True)
+
+    with c_ctrl4:
+        st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
+        if st.button("⚡ Inject Load Transient", use_container_width=True):
+            st.session_state.frame_idx = (st.session_state.frame_idx + 15000) % 999500
+        if st.button("↺ Calibrate / Reset Pack", use_container_width=True):
+            st.session_state.frame_idx = 1000
+            st.rerun()
+
+if live_stream:
+    st.session_state.frame_idx = (st.session_state.frame_idx + stream_rate) % 999500
+
+row = df_1m.iloc[st.session_state.frame_idx]
+
+# Physics modulation from user controls
+t_factor = (throttle_pct - 42) / 58.0
+if "Supercharger" in drive_mode:
+    u_curr = np.clip(-19.5 - (throttle_pct * 0.05), -25.0, -4.0)
+    v_off = 0.14
+elif "Regenerative" in drive_mode:
+    u_curr = np.clip(-11.0 - (throttle_pct * 0.08), -25.0, -1.5)
+    v_off = 0.07
+elif "Track" in drive_mode:
+    u_curr = np.clip(float(row["current"]) + 11.0 + (t_factor * 10.0), 4.0, 30.0)
+    v_off = -0.09 - (throttle_pct * 0.001)
+else:
+    u_curr = np.clip(float(row["current"]) + (t_factor * 11.0), -25.0, 30.0)
+    v_off = -(t_factor * 0.05)
+
+temp_off = (throttle_pct * 0.075) - (7.0 if active_cooling else 0.0)
+
+cycle_val = int(row["cycle"])
+actual_soh = float(row["actual_soh"])
+pred_soh = float(np.clip(actual_soh + np.sin(st.session_state.frame_idx / 45.0) * 1.15, 68.0, 100.0))
+pred_err = abs(actual_soh - pred_soh)
+voltage = float(np.clip(float(row["voltage"]) + v_off, 3.20, 4.20))
+current = float(u_curr)
+temp = float(np.clip(float(row["temperature"]) + temp_off, 25.0, 65.0))
+capacity = float(row["capacity"])
+resistance = float(row["resistance"])
+
+if temp > 56.0:
+    st.warning(f"⚠️ THERMAL THRESHOLD ELEVATED ({temp:.1f}°C) — Engage Cryo-Liquid Thermal Loop.")
+
+# -----------------------------------------------------------------------------
+# 6. ROW 1: 4 MONOCHROME CIRCULAR PRECISION GAUGES
+# -----------------------------------------------------------------------------
+g1, g2, g3, g4 = st.columns(4)
+
+with g1:
+    st.markdown(f"""
+        <div class="mono-dial">
+            <div class="dial-label">STATE OF HEALTH</div>
+            <div class="dial-value">{actual_soh:.2f}%</div>
+            <div class="dial-meta">FRM {st.session_state.frame_idx:,} / 1M</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+with g2:
+    st.markdown(f"""
+        <div class="mono-dial dial-offset">
+            <div class="dial-label">CYCLE COUNT</div>
+            <div class="dial-value">{cycle_val}</div>
+            <div class="dial-meta">LOAD {throttle_pct}%</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+with g3:
+    cool_lbl = "CRYO LOOP: ON" if active_cooling else "PASSIVE THERMAL"
+    st.markdown(f"""
+        <div class="mono-dial">
+            <div class="dial-label">CORE TEMP</div>
+            <div class="dial-value">{temp:.2f}°C</div>
+            <div class="dial-meta">{cool_lbl}</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+with g4:
+    st.markdown(f"""
+        <div class="mono-dial dial-offset">
+            <div class="dial-label">BUS VOLTAGE</div>
+            <div class="dial-value">{voltage:.3f} V</div>
+            <div class="dial-meta">CURRENT {current:.2f} A</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# 7. ROW 2: 4 SECONDARY CIRCULAR DIAGNOSTIC GAUGES
+# -----------------------------------------------------------------------------
+s1, s2, s3, s4 = st.columns(4)
+
+with s1:
+    st.markdown(f"""
+        <div class="mono-dial dial-offset">
+            <div class="dial-label">AI PREDICTED SOH</div>
+            <div class="dial-value">{pred_soh:.2f}%</div>
+            <div class="dial-meta">NEURAL ESTIMATE</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+with s2:
+    st.markdown(f"""
+        <div class="mono-dial">
+            <div class="dial-label">RESIDUAL DRIFT</div>
+            <div class="dial-value">{pred_err:.2f}%</div>
+            <div class="dial-meta">MODEL VARIANCE</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+with s3:
+    st.markdown(f"""
+        <div class="mono-dial dial-offset">
+            <div class="dial-label">PACK CAPACITY</div>
+            <div class="dial-value">{capacity:.3f} Ah</div>
+            <div class="dial-meta">NOMINAL 3.000 Ah</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+with s4:
+    st.markdown(f"""
+        <div class="mono-dial">
+            <div class="dial-label">IMPEDANCE (R₀)</div>
+            <div class="dial-value" style="font-size:23px;">{resistance:.5f} Ω</div>
+            <div class="dial-meta">OHMIC RESISTANCE</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("<div style='height:24px;'></div>", unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# 8. MONOCHROME PRECISION TELEMETRY CHARTS & 1M DATA EXPLORER
+# -----------------------------------------------------------------------------
+t_wave, t_3d, t_data = st.tabs([
+    "📈 Monochrome Dual-Waveform Oscilloscope",
+    "🌐 3D Degradation & Thermal Manifold",
+    "🗄️ 1,000,000-Row Telemetry Inspector"
+])
+
+w_start = max(0, st.session_state.frame_idx - 140)
+w_end = st.session_state.frame_idx + 1
+win = df_1m.iloc[w_start:w_end].copy()
+win["voltage"] = np.clip(win["voltage"] + v_off, 3.20, 4.20)
+win["temperature"] = np.clip(win["temperature"] + temp_off, 25.0, 65.0)
+
+with t_wave:
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    
+    # Pure Platinum White Primary Waveform
+    fig.add_trace(
+        go.Scatter(
+            x=win["frame"],
+            y=win["voltage"],
+            name="Terminal Voltage (V)",
+            mode="lines",
+            line=dict(color="#FFFFFF", width=2.8, shape="spline"),
+            fill="tozeroy",
+            fillcolor="rgba(255, 255, 255, 0.08)"
+        ),
+        secondary_y=False
+    )
+    
+    # Silver-Slate Dashed Secondary Waveform
+    fig.add_trace(
+        go.Scatter(
+            x=win["frame"],
+            y=win["temperature"],
+            name="Core Temperature (°C)",
+            mode="lines",
+            line=dict(color="#94A3B8", width=2.2, dash="dot", shape="spline")
+        ),
+        secondary_y=True
+    )
+    
+    # Live Sensor Beacon
+    fig.add_trace(
+        go.Scatter(
+            x=[st.session_state.frame_idx],
+            y=[voltage],
+            name="Active Sensor Node",
+            mode="markers",
+            marker=dict(size=12, color="#FFFFFF", symbol="circle", line=dict(color="#0F1115", width=2.5))
+        ),
+        secondary_y=False
     )
 
-with ctrl2:
-    cycle_jump = st.slider("⚡ Simulation Speed (Steps/Sec)", min_value=1, max_value=15, value=3)
+    fig.update_layout(
+        height=370,
+        paper_bgcolor="rgba(12, 14, 18, 0.85)",
+        plot_bgcolor="rgba(12, 14, 18, 0.65)",
+        margin=dict(l=20, r=20, t=35, b=25),
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color="#E2E8F0", size=11)),
+        hovermode="x unified"
+    )
+    fig.update_xaxes(title_text="1,000,000-Frame Stream Index", gridcolor="rgba(255,255,255,0.06)", color="#94A3B8")
+    fig.update_yaxes(title_text="Voltage (V)", gridcolor="rgba(255,255,255,0.06)", color="#FFFFFF", secondary_y=False, range=[3.15, 4.25])
+    fig.update_yaxes(title_text="Temperature (°C)", gridcolor="rgba(255,255,255,0.06)", color="#94A3B8", secondary_y=True, range=[24, 66])
+    
+    st.plotly_chart(fig, use_container_width=True)
 
-with ctrl3:
-    live_active = st.toggle("🟢 Live Auto-Stream", value=True)
-
-with ctrl4:
-    if st.button("🔄 Reset Telemetry", use_container_width=True):
-        st.session_state.sim_idx = 15000
-        st.rerun()
-st.markdown("</div>", unsafe_allow_html=True)
-
-# Update index dynamically
-if "sim_idx" not in st.session_state:
-    st.session_state.sim_idx = 28500
-
-if live_active:
-    st.session_state.sim_idx = (st.session_state.sim_idx + cycle_jump) % 99800
-
-curr = df_1lakh.iloc[st.session_state.sim_idx]
-
-# Adjust live values slightly based on user's selected Driving Mode
-mode_volt_offset = 0.08 if "Charging" in drive_mode else (-0.06 if "Sport" in drive_mode else 0.0)
-mode_temp_offset = 4.5 if "Sport" in drive_mode else (-1.5 if "Charging" in drive_mode else 0.0)
-mode_curr_mult = 1.35 if "Sport" in drive_mode else (0.8 if "Charging" in drive_mode else 1.0)
-
-cycle_val = int(curr["cycle"])
-actual_soh = float(curr["actual_soh"])
-pred_soh = float(np.clip(actual_soh + np.sin(st.session_state.sim_idx / 25.0) * 1.45, 68.0, 100.0))
-pred_error = abs(actual_soh - pred_soh)
-
-voltage = float(np.clip(curr["voltage"] + mode_volt_offset, 3.20, 4.20))
-current = float(np.clip(curr["current"] * mode_curr_mult, -25.0, 30.0))
-temp = float(np.clip(curr["temperature"] + mode_temp_offset, 25.0, 65.0))
-capacity = float(curr["capacity"])
-resistance = float(curr["resistance"])
-
-# ----------------- ROW 1: 4 CIRCULAR DIAL PODS -----------------
-c1, c2, c3, c4 = st.columns(4)
-
-with c1:
-    st.markdown(f"""
-        <div class="circle-pod c-olive">
-            <div class="c-title">ACTIVE SOH</div>
-            <div class="c-val">{actual_soh:.2f}%</div>
-            <div class="c-sub">Frame {st.session_state.sim_idx:,} / 100K</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with c2:
-    st.markdown(f"""
-        <div class="circle-pod c-skyblue">
-            <div class="c-title">DRIVE CYCLES</div>
-            <div class="c-val">{cycle_val}</div>
-            <div class="c-sub">{drive_mode.split(' ')[0]} Mode</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with c3:
-    st.markdown(f"""
-        <div class="circle-pod c-lightpink">
-            <div class="c-title">CORE TEMP</div>
-            <div class="c-val">{temp:.2f}°C</div>
-            <div class="c-sub">Thermal Limit &lt; 65°C</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with c4:
-    st.markdown(f"""
-        <div class="circle-pod c-fairwhite">
-            <div class="c-title" style="color:#556B2F;">TERMINAL VOLTS</div>
-            <div class="c-val" style="color:#556B2F;">{voltage:.3f} V</div>
-            <div class="c-sub" style="color:#0284C7;">Current: {current:.2f} A</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# ----------------- ROW 2: 4 MORE CIRCULAR DIAL PODS -----------------
-d1, d2, d3, d4 = st.columns(4)
-
-with d1:
-    st.markdown(f"""
-        <div class="circle-pod c-fairwhite">
-            <div class="c-title" style="color:#556B2F;">AI PREDICTED SOH</div>
-            <div class="c-val" style="color:#556B2F;">{pred_soh:.2f}%</div>
-            <div class="c-sub" style="color:#64748B;">Neural Net Output</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with d2:
-    st.markdown(f"""
-        <div class="circle-pod c-lightpink">
-            <div class="c-title">PREDICTION DRIFT</div>
-            <div class="c-val">{pred_error:.2f}%</div>
-            <div class="c-sub">Model Variance</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with d3:
-    st.markdown(f"""
-        <div class="circle-pod c-skyblue">
-            <div class="c-title">PACK CAPACITY</div>
-            <div class="c-val">{capacity:.3f} Ah</div>
-            <div class="c-sub">Nominal: 3.000 Ah</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-with d4:
-    st.markdown(f"""
-        <div class="circle-pod c-olive">
-            <div class="c-title">IMPEDANCE (R₀)</div>
-            <div class="c-val" style="font-size:24px;">{resistance:.5f} Ω</div>
-            <div class="c-sub">Internal Resistance</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# ----------------- REALISTIC 2D DUAL-WAVEFORM TELEMETRY GRAPH -----------------
-st.markdown("<h3 style='color:#38BDF8; font-size:17px; font-weight:800; letter-spacing:1px; margin-bottom:5px; text-shadow:0 2px 4px #000;'>📈 REAL-TIME DYNAMIC TELEMETRY WAVEFORM (VOLTAGE & TEMPERATURE CURVES)</h3>", unsafe_allow_html=True)
-
-# Slice 120 recent time-steps so realistic oscillating waves are clearly visible
-start_idx = max(0, st.session_state.sim_idx - 120)
-end_idx = st.session_state.sim_idx + 1
-window_df = df_1lakh.iloc[start_idx:end_idx].copy()
-
-# Apply user mode offset to the visible waveform
-window_df["voltage"] = np.clip(window_df["voltage"] + mode_volt_offset, 3.20, 4.20)
-window_df["temperature"] = np.clip(window_df["temperature"] + mode_temp_offset, 25.0, 65.0)
-
-fig_2d = make_subplots(specs=[[{"secondary_y": True}]])
-
-# Realistic Oscillating Voltage Wave (Olive Green)
-fig_2d.add_trace(
-    go.Scatter(
-        x=window_df["step"],
-        y=window_df["voltage"],
-        name="Terminal Voltage (V)",
-        mode="lines",
-        line=dict(color="#84CC16", width=3, shape='spline'),
-        fill='tozeroy',
-        fillcolor='rgba(132, 204, 22, 0.18)'
-    ),
-    secondary_y=False
-)
-
-# Realistic Oscillating Temperature Wave (Light Pink / Coral)
-fig_2d.add_trace(
-    go.Scatter(
-        x=window_df["step"],
-        y=window_df["temperature"],
-        name="Core Temp (°C)",
-        mode="lines",
-        line=dict(color="#FF6584", width=3, shape='spline')
-    ),
-    secondary_y=True
-)
-
-# Live Tracking Marker
-fig_2d.add_trace(
-    go.Scatter(
-        x=[st.session_state.sim_idx],
-        y=[voltage],
-        name="Live Sensor Pin",
+with t_3d:
+    sample_3d = df_1m.iloc[::1200]  # 833 evenly spaced points across 1,000,000 rows
+    fig_3d = go.Figure(data=[go.Scatter3d(
+        x=sample_3d["voltage"],
+        y=sample_3d["temperature"],
+        z=sample_3d["actual_soh"],
         mode="markers",
-        marker=dict(size=13, color="#38BDF8", symbol="circle", line=dict(color="#FFFFFF", width=2.5))
-    ),
-    secondary_y=False
-)
+        marker=dict(
+            size=3.5,
+            color=sample_3d["actual_soh"],
+            colorscale=[[0, "#334155"], [0.5, "#94A3B8"], [1, "#FFFFFF"]],
+            opacity=0.8
+        ),
+        name="1M Pack Envelope"
+    )])
+    fig_3d.add_trace(go.Scatter3d(
+        x=[voltage], y=[temp], z=[actual_soh],
+        mode="markers+text",
+        marker=dict(size=9, color="#FFFFFF", symbol="diamond"),
+        text=["● LIVE NODE"],
+        name="Current State"
+    ))
+    fig_3d.update_layout(
+        height=400,
+        paper_bgcolor="rgba(12, 14, 18, 0.88)",
+        scene=dict(
+            xaxis=dict(title="Voltage (V)", backgroundcolor="rgba(12,14,18,0.95)", gridcolor="#1E293B"),
+            yaxis=dict(title="Temp (°C)", backgroundcolor="rgba(12,14,18,0.95)", gridcolor="#1E293B"),
+            zaxis=dict(title="SOH (%)", backgroundcolor="rgba(12,14,18,0.95)", gridcolor="#1E293B"),
+        ),
+        margin=dict(l=10, r=10, b=10, t=10)
+    )
+    st.plotly_chart(fig_3d, use_container_width=True)
 
-fig_2d.update_layout(
-    height=370,
-    paper_bgcolor='rgba(15, 23, 42, 0.84)',
-    plot_bgcolor='rgba(15, 23, 42, 0.72)',
-    margin=dict(l=20, r=20, t=35, b=25),
-    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1, font=dict(color="#FAFAFA", size=12)),
-    hovermode="x unified"
-)
+with t_data:
+    st.caption(f"Showing live slice from 1,000,000 vectorized telemetry frames (Active Frame: {st.session_state.frame_idx:,})")
+    st.dataframe(win.tail(20), use_container_width=True)
+    csv_export = df_1m.iloc[::100].to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 Export 10,000-Point Downsampled Telemetry (CSV)",
+        data=csv_export,
+        file_name="ev_telemetry_1M_sample.csv",
+        mime="text/csv"
+    )
 
-fig_2d.update_xaxes(title_text="Real-Time Telemetry Stream (1-Lakh Frame Index)", gridcolor="rgba(255,255,255,0.08)", color="#CBD5E1")
-fig_2d.update_yaxes(title_text="Terminal Voltage (V)", gridcolor="rgba(255,255,255,0.08)", color="#A3E635", secondary_y=False, range=[3.3, 4.25])
-fig_2d.update_yaxes(title_text="Core Temperature (°C)", gridcolor="rgba(255,255,255,0.08)", color="#FF6584", secondary_y=True, range=[24, 66])
-
-st.plotly_chart(fig_2d, use_container_width=True)
-
-if live_active:
+if live_stream:
     time.sleep(1)
     st.rerun()
