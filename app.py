@@ -8,7 +8,7 @@ import base64
 import os
 
 # -----------------------------------------------------------------------------
-# 1. PAGE SETUP (PURE CAR SILHOUETTE LAUNCH + DUAL-TONE COCKPIT)
+# 1. PAGE SETUP (INSTANT LOAD DUAL-TONE COCKPIT - NO ANIMATION)
 # -----------------------------------------------------------------------------
 st.set_page_config(
     page_title="EV Battery OS // Telemetry Studio",
@@ -30,119 +30,12 @@ bg_img = (
     else "url('https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1920&q=80')"
 )
 
-if "intro_played" not in st.session_state:
-    st.session_state.intro_played = False
-
-play_intro_now = not st.session_state.intro_played
-if play_intro_now:
-    st.session_state.intro_played = True
-
 # -----------------------------------------------------------------------------
-# 2. ONLY CAR (NO BOX/BACKGROUND) RACING INTRO + REAR SLIPSTREAM REVEAL CSS
+# 2. CLEAN HIGH-CONTRAST DUAL-TONE CSS (ZERO ANIMATIONS)
 # -----------------------------------------------------------------------------
-intro_css = f"""
-    /* Curtain wipes from Right to Left strictly behind the car's rear end */
-    @keyframes curtainRearWipe {{
-        0%   {{ clip-path: inset(0 0 0 0); opacity: 1; }}
-        20%  {{ clip-path: inset(0 0 0 0); opacity: 1; }}
-        82%  {{ clip-path: inset(0 100% 0 0); opacity: 1; }}
-        100% {{ clip-path: inset(0 100% 0 0); opacity: 0; visibility: hidden; }}
-    }}
-
-    /* Pure Car Racing Right -> Left (Facing Left) */
-    @keyframes pureCarRace {{
-        0%   {{ transform: translate3d(115vw, 0, 0) scale(0.95); opacity: 0; }}
-        8%   {{ opacity: 1; }}
-        30%  {{ transform: translate3d(10vw, 0, 0) scale(1.02); opacity: 1; }}
-        52%  {{ transform: translate3d(-8vw, 0, 0) scale(1.04); opacity: 1; }}
-        92%  {{ transform: translate3d(-120vw, 0, 0) scale(1.06); opacity: 1; }}
-        100% {{ transform: translate3d(-135vw, 0, 0) scale(1.06); opacity: 0; visibility: hidden; }}
-    }}
-
-    /* Wheel Rotation for Pure Vector Car */
-    @keyframes wheelSpin {{
-        0%   {{ transform: rotate(0deg); }}
-        100% {{ transform: rotate(-1440deg); }}
-    }}
-
-    /* Rear Aerodynamic Slipstream Lines */
-    @keyframes rearStreak {{
-        0%   {{ transform: translate3d(110vw, 0, 0); opacity: 0; }}
-        35%  {{ opacity: 0.9; }}
-        100% {{ transform: translate3d(-120vw, 0, 0); opacity: 0; }}
-    }}
-
-    /* Dashboard Modules Emerging from Car's Rear Wake */
-    @keyframes rearWakeArrange {{
-        0%   {{ opacity: 0; transform: translate3d(65px, 0, 0) scale(0.95); }}
-        100% {{ opacity: 1; transform: translate3d(0px, 0, 0) scale(1); }}
-    }}
-
-    .intro-curtain {{
-        position: fixed;
-        inset: 0;
-        background: radial-gradient(circle at 50% 50%, #092B34 0%, #030F13 100%);
-        z-index: 99990;
-        pointer-events: none;
-        will-change: clip-path, opacity;
-        animation: curtainRearWipe 3.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
-    }}
-
-    .racing-car-stage {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 99999;
-        pointer-events: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-    }}
-
-    /* Pure Floating Car Only - No Border, No Card, No Background Box */
-    .pure-car-wrapper {{
-        width: 580px;
-        max-width: 85vw;
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        position: relative;
-        will-change: transform, opacity;
-        animation: pureCarRace 3.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
-    }}
-
-    .streak-line {{
-        position: fixed;
-        height: 2.5px;
-        background: linear-gradient(270deg, transparent, #38BDF8, #FFFFFF);
-        border-radius: 999px;
-        z-index: 99995;
-        pointer-events: none;
-        will-change: transform, opacity;
-        animation: rearStreak 2.4s ease-out forwards;
-    }}
-    .s1 {{ top: 38%; width: 42vw; animation-delay: 0.4s; }}
-    .s2 {{ top: 50%; width: 58vw; animation-delay: 0.5s; }}
-    .s3 {{ top: 61%; width: 38vw; animation-delay: 0.6s; }}
-
-    /* Staggered Arrangement Trailing Behind the Car's Rear End */
-    .wake-1 {{ opacity: 0; will-change: transform, opacity; animation: rearWakeArrange 0.80s cubic-bezier(0.16, 1, 0.3, 1) 1.65s forwards; }}
-    .wake-2 {{ opacity: 0; will-change: transform, opacity; animation: rearWakeArrange 0.80s cubic-bezier(0.16, 1, 0.3, 1) 1.85s forwards; }}
-    .wake-3 {{ opacity: 0; will-change: transform, opacity; animation: rearWakeArrange 0.85s cubic-bezier(0.16, 1, 0.3, 1) 2.05s forwards; }}
-    .wake-4 {{ opacity: 0; will-change: transform, opacity; animation: rearWakeArrange 0.85s cubic-bezier(0.16, 1, 0.3, 1) 2.25s forwards; }}
-    .wake-5 {{ opacity: 0; will-change: transform, opacity; animation: rearWakeArrange 0.90s cubic-bezier(0.16, 1, 0.3, 1) 2.45s forwards; }}
-""" if play_intro_now else """
-    .wake-1, .wake-2, .wake-3, .wake-4, .wake-5 {{ opacity: 1; }}
-"""
-
 st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap');
-
-    {intro_css}
 
     .stApp {{
         background: 
@@ -173,7 +66,6 @@ st.markdown(f"""
         font-weight: 800 !important;
         border-radius: 10px !important;
         box-shadow: 0 4px 12px rgba(15, 76, 92, 0.12) !important;
-        transition: all 0.2s ease !important;
     }}
     .stButton > button:hover {{
         background-color: #0F4C5C !important;
@@ -232,15 +124,9 @@ st.markdown(f"""
         height: 9px;
         background: #38BDF8;
         border-radius: 50%;
-        box-shadow: 0 0 8px #38BDF8;
-        animation: blink 1.4s infinite;
-    }}
-    @keyframes blink {{
-        0%, 100% {{ opacity: 1; }}
-        50% {{ opacity: 0.3; }}
     }}
 
-    /* Dual-Tone Circular SVG Gauges */
+    /* Dual-Tone Circular SVG Gauges (Static, Crisp & Instant) */
     .gauge-card-light {{
         background: #FFFFFF;
         border: 2.5px solid #0F4C5C;
@@ -253,12 +139,7 @@ st.markdown(f"""
         align-items: center;
         justify-content: center;
         box-shadow: 0 14px 34px rgba(15, 76, 92, 0.16);
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
         position: relative;
-    }}
-    .gauge-card-light:hover {{
-        transform: translateY(-5px) scale(1.03);
-        box-shadow: 0 20px 42px rgba(15, 76, 92, 0.25);
     }}
 
     .gauge-card-teal {{
@@ -273,12 +154,7 @@ st.markdown(f"""
         align-items: center;
         justify-content: center;
         box-shadow: 0 16px 36px rgba(9, 53, 64, 0.35);
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
         position: relative;
-    }}
-    .gauge-card-teal:hover {{
-        transform: translateY(-5px) scale(1.03);
-        box-shadow: 0 22px 44px rgba(9, 53, 64, 0.45);
     }}
 
     .glass-panel {{
@@ -291,74 +167,6 @@ st.markdown(f"""
     }}
 </style>
 """, unsafe_allow_html=True)
-
-# Render ONLY the Transparent Neon Electric Car (No Background / No Box)
-if play_intro_now:
-    st.markdown("""
-        <div class="intro-curtain"></div>
-        <div class="streak-line s1"></div>
-        <div class="streak-line s2"></div>
-        <div class="streak-line s3"></div>
-        <div class="racing-car-stage">
-            <div class="pure-car-wrapper">
-                <!-- Pure Transparent Aerodynamic EV Coupe (Facing Left, No Background) -->
-                <svg viewBox="0 0 800 260" width="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible;">
-                    <defs>
-                        <linearGradient id="carBodyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#38BDF8"/>
-                            <stop offset="50%" stop-color="#0EA5E9"/>
-                            <stop offset="100%" stop-color="#0284C7"/>
-                        </linearGradient>
-                        <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#03131A" stop-opacity="0.95"/>
-                            <stop offset="100%" stop-color="#0F4C5C" stop-opacity="0.85"/>
-                        </linearGradient>
-                        <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur stdDeviation="5" result="blur"/>
-                            <feMerge>
-                                <feMergeNode in="blur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                            </feMerge>
-                        </filter>
-                    </defs>
-
-                    <!-- Headlight Beam (Left Front) -->
-                    <polygon points="48,158 -140,130 -140,185" fill="url(#carBodyGrad)" opacity="0.22"/>
-
-                    <!-- Lower Chassis & Aerodynamic Body (Facing Left) -->
-                    <path d="M 45 162 C 42 142, 72 125, 165 114 C 245 72, 365 56, 515 62 C 625 68, 705 95, 752 122 C 765 132, 768 155, 755 170 L 668 175 A 56 56 0 0 0 556 175 L 244 175 A 56 56 0 0 0 132 175 L 55 172 C 46 170, 45 166, 45 162 Z"
-                          fill="url(#carBodyGrad)" stroke="#BAE6FD" stroke-width="3" filter="url(#neonGlow)"/>
-
-                    <!-- Cabin Glass Canopy -->
-                    <path d="M 192 112 C 262 76, 368 64, 502 69 C 578 73, 635 90, 672 112 Z"
-                          fill="url(#glassGrad)" stroke="#7DD3FC" stroke-width="2"/>
-
-                    <!-- Window Pillar -->
-                    <line x1="415" y1="67" x2="405" y2="112" stroke="#38BDF8" stroke-width="3"/>
-
-                    <!-- Glowing LED Headlight (Front Left) -->
-                    <path d="M 56 146 L 105 138 L 95 149 Z" fill="#FFFFFF" filter="url(#neonGlow)"/>
-
-                    <!-- Glowing LED Taillight (Rear Right) -->
-                    <path d="M 756 130 L 725 132 L 732 142 L 758 140 Z" fill="#FF4D6D" filter="url(#neonGlow)"/>
-
-                    <!-- Front Wheel (Left) -->
-                    <g transform="translate(188, 175)">
-                        <circle cx="0" cy="0" r="46" fill="#06141B" stroke="#38BDF8" stroke-width="4"/>
-                        <circle cx="0" cy="0" r="30" fill="none" stroke="#BAE6FD" stroke-width="2.5" stroke-dasharray="14 8"/>
-                        <circle cx="0" cy="0" r="10" fill="#38BDF8"/>
-                    </g>
-
-                    <!-- Rear Wheel (Right) -->
-                    <g transform="translate(612, 175)">
-                        <circle cx="0" cy="0" r="46" fill="#06141B" stroke="#38BDF8" stroke-width="4"/>
-                        <circle cx="0" cy="0" r="30" fill="none" stroke="#BAE6FD" stroke-width="2.5" stroke-dasharray="14 8"/>
-                        <circle cx="0" cy="0" r="10" fill="#38BDF8"/>
-                    </g>
-                </svg>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
 # 3. SVG CIRCULAR RADIAL GAUGE GENERATOR
@@ -432,37 +240,28 @@ if "scenario" not in st.session_state:
     st.session_state.scenario = "Balanced Cruise"
 
 # -----------------------------------------------------------------------------
-# 5. HEADER (WAKE 1)
+# 5. HEADER
 # -----------------------------------------------------------------------------
-st.markdown('<div class="wake-1">', unsafe_allow_html=True)
-h_col1, h_col2 = st.columns([4.2, 1])
-with h_col1:
-    st.markdown("""
-        <div class="cockpit-top">
-            <div>
-                <div style="font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:2px; color:#0F4C5C; font-weight:800;">
-                    PROTOTYPE TELEMETRY OS // 1,000,000 VECTORIZED FRAMES
-                </div>
-                <h1 style="margin:3px 0 0 0; font-size:24px; font-weight:800; color:#091526; letter-spacing:-0.4px;">
-                    EV POWERTRAIN & BATTERY INTELLIGENCE STUDIO
-                </h1>
+st.markdown("""
+    <div class="cockpit-top">
+        <div>
+            <div style="font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:2px; color:#0F4C5C; font-weight:800;">
+                PROTOTYPE TELEMETRY OS // 1,000,000 VECTORIZED FRAMES
             </div>
-            <div class="live-pill">
-                <span class="pulse-dot"></span> BMS TELEMETRY ONLINE
-            </div>
+            <h1 style="margin:3px 0 0 0; font-size:24px; font-weight:800; color:#091526; letter-spacing:-0.4px;">
+                EV POWERTRAIN & BATTERY INTELLIGENCE STUDIO
+            </h1>
         </div>
-    """, unsafe_allow_html=True)
-with h_col2:
-    st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
-    if st.button("🏁 Replay Car Launch", use_container_width=True):
-        st.session_state.intro_played = False
-        st.rerun()
-st.markdown('</div>', unsafe_allow_html=True)
+        <div class="live-pill">
+            <span class="pulse-dot"></span> BMS TELEMETRY ONLINE
+        </div>
+    </div>
+""", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 6. ONE-CLICK SCENARIO LAUNCHPAD + INTERACTIVE CONTROLS (WAKE 2)
+# 6. ONE-CLICK SCENARIO LAUNCHPAD + INTERACTIVE CONTROLS
 # -----------------------------------------------------------------------------
-st.markdown('<div class="wake-2"><div class="glass-panel">', unsafe_allow_html=True)
+st.markdown('<div class="glass-panel">', unsafe_allow_html=True)
 sc1, sc2, sc3, sc4 = st.columns(4)
 with sc1:
     if st.button("🌿 Balanced Urban Cruise", use_container_width=True):
@@ -488,7 +287,7 @@ with c2:
 with c3:
     chiller_on = st.toggle("❄️ Active Liquid Chiller", value=(st.session_state.scenario == "Thermal Stress"))
     auto_play = st.toggle("▶️ Live Telemetry Stream", value=True)
-st.markdown('</div></div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 if auto_play:
     st.session_state.frame_idx = (st.session_state.frame_idx + 15) % 999000
@@ -524,9 +323,8 @@ capacity = float(row["capacity"])
 resistance = float(row["resistance"])
 
 # -----------------------------------------------------------------------------
-# 7. ROW 1: 4 DYNAMIC SVG CIRCULAR GAUGES (WAKE 3)
+# 7. ROW 1: 4 CIRCULAR GAUGES
 # -----------------------------------------------------------------------------
-st.markdown('<div class="wake-3">', unsafe_allow_html=True)
 g1, g2, g3, g4 = st.columns(4)
 
 with g1:
@@ -554,14 +352,12 @@ with g4:
         render_radial_gauge("PACK CURRENT", f"{curr_val:+.2f} A", flow_txt, curr_pct, dark_teal=True),
         unsafe_allow_html=True
     )
-st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("<div style='height:18px;'></div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 8. ROW 2: 4 DIAGNOSTIC & AI HEALTH SVG CIRCULAR GAUGES (WAKE 4)
+# 8. ROW 2: 4 DIAGNOSTIC & AI HEALTH CIRCULAR GAUGES
 # -----------------------------------------------------------------------------
-st.markdown('<div class="wake-4">', unsafe_allow_html=True)
 s1, s2, s3, s4 = st.columns(4)
 
 with s1:
@@ -587,14 +383,12 @@ with s4:
         render_radial_gauge("IMPEDANCE (R₀)", f"{resistance:.4f} Ω", f"FRM {st.session_state.frame_idx:,}", res_pct, dark_teal=False),
         unsafe_allow_html=True
     )
-st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown("<div style='height:22px;'></div>", unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 9. MULTI-VIEW TELEMETRY STUDIO (WAKE 5)
+# 9. MULTI-VIEW TELEMETRY STUDIO
 # -----------------------------------------------------------------------------
-st.markdown('<div class="wake-5">', unsafe_allow_html=True)
 tab1, tab2, tab3 = st.tabs([
     "📈 Dual-Axis Live Oscilloscope",
     "🔋 96-Cell Battery Pack Heatmap (Interactive)",
@@ -704,9 +498,7 @@ with tab3:
         st.dataframe(win[["frame", "cycle", "voltage", "current", "temperature", "actual_soh"]].tail(10), use_container_width=True)
         csv_data = df_1m.iloc[::100].to_csv(index=False).encode("utf-8")
         st.download_button("📥 Export 10K Telemetry CSV", csv_data, "ev_telemetry_studio.csv", "text/csv", use_container_width=True)
-st.markdown('</div>', unsafe_allow_html=True)
 
-# Pause 3.7s on initial launch so the pure car transition finishes cleanly
 if auto_play:
-    time.sleep(3.7 if play_intro_now else 1.0)
+    time.sleep(1.0)
     st.rerun()
